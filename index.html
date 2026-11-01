@@ -1,581 +1,438 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#08090b">
-<title>Enjambre · centro de control</title>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d1117">
+<title>Panel del enjambre</title>
 <style>
-:root{--gold:#c9a24b;--gold2:#e8d9a8;--ok:#4ec98a;--warn:#e0a33c;--bad:#e0625a;--txt:#e9e6df;--dim:#98938a;--line:#252932;--card:#0e1218;--card2:#0d1016;--negro:#08090b}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--negro);color:var(--txt);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45;font-size:13.5px;padding:10px 10px 40px}
-.wrap{max-width:980px;margin:0 auto}
-.sprite{display:none}
-.ic{width:16px;height:16px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
-.ic.fill{fill:currentColor;stroke:none}
-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px;gap:8px;flex-wrap:wrap}
-.kick{letter-spacing:.24em;font-size:9px;color:var(--gold);text-transform:uppercase}
-h1{font-size:17px;font-weight:600;margin-top:2px}
-.live{font-size:10.5px;color:var(--dim);text-align:right;line-height:1.35}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-right:4px;animation:p 2s infinite}
-@keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
-.tira{display:flex;gap:6px;flex-wrap:wrap;padding:6px 0 9px;margin-bottom:4px;border-bottom:1px solid var(--line)}
-.tira a{flex:0 0 auto;font-size:10.5px;color:var(--dim);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:4px 10px;white-space:nowrap}
-.tira a:hover{color:var(--gold);border-color:var(--gold)}
-h2{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:16px 0 7px;scroll-margin-top:10px;display:flex;align-items:center;gap:6px}
-h2 svg{color:var(--gold)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px}
-.lock.on{border-color:#3d6b52;background:linear-gradient(180deg,#0f1d16,#0e1218)}
-.lock.pausa{border-color:#8a7130;background:linear-gradient(180deg,#1d1a10,#0e1218)}
-.lock .t{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:5px}
-.lock .big{font-size:15.5px;font-weight:600;color:#fff;line-height:1.3}
-.lock .sub{font-size:11.5px;color:var(--gold2);margin-top:4px}
-.lock .latido{font-size:10.5px;color:var(--dim);margin-top:7px;border-top:1px solid var(--line);padding-top:5px}
-.vig{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
-.vig span{display:flex;align-items:center;gap:5px;font-size:10.5px;border:1px solid var(--line);border-radius:20px;padding:4px 9px;color:var(--dim);background:var(--card2)}
-.vig span.on{color:var(--gold2);border-color:#5a4a1e}
-.vig span.si{color:var(--bad);border-color:#5c2f2f}
-.vig span .ic{width:13px;height:13px}
-.btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:6px}
-button{background:#12161d;color:var(--txt);border:1px solid #2a3140;border-radius:9px;padding:9px 9px;font-size:12px;font-family:inherit;cursor:pointer;text-align:left;transition:.12s;line-height:1.25}
-button:hover{border-color:var(--gold);color:#fff}
-button b{display:block;font-size:12.5px;color:#fff;font-weight:600}
-button small{color:var(--dim);font-size:10px}
-button.peligro:hover{border-color:var(--bad)}
-button[disabled]{cursor:not-allowed}
-.btns.mini{grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}
-.btns.mini button{padding:6px 7px;font-size:11px;text-align:center}
-.btns.mini button b{font-size:11.5px}
-.msg{margin-top:8px;font-size:11.5px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0f1319;display:none}
-.perfil{border:1px solid var(--line);background:var(--card);border-radius:13px;padding:12px;margin-bottom:10px;overflow:hidden}
-.perfil.down{background:var(--card2)}
-.perfil.bueno{border-left:3px solid #2f5c46}
-.perfil.atencion{border-left:3px solid var(--warn)}
-.perfil.critico{border-left:3px solid var(--bad)}
-.perfil.apagado{border-left:3px solid #3a3d45;opacity:.72}
-.ptop{display:flex;gap:11px;align-items:flex-start}
-.avatar{width:56px;height:56px;border-radius:15px;border:1px solid var(--line);background:radial-gradient(circle at 32% 22%,#1b2129,#0a0d11);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.avatar svg{width:38px;height:38px;stroke:var(--gold2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.perfil.down .avatar svg{stroke:var(--dim)}
-.pinfo{flex:1;min-width:0}
-.pnombre{font-size:15px;font-weight:600;color:#fff;line-height:1.2}
-.ptipo{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;display:block;margin-top:2px}
-.prol{font-size:11px;color:var(--dim);margin-top:1px}
-.pchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
-.chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
-.chip .ic{width:12px;height:12px}
-.chip.vivo{color:var(--ok);border-color:#2f5c46}
-.chip.muerto{color:var(--bad);border-color:#5c2f2f}
-.chip.bueno{color:var(--ok);border-color:#2f5c46}
-.chip.atencion{color:var(--warn);border-color:#5a4a1e}
-.chip.critico{color:var(--bad);border-color:#5c2f2f}
-.chip.apagado{color:var(--dim)}
-.motivos{font-size:10.5px;color:var(--gold2);margin-top:6px;padding-left:2px}
-.motivos i{color:var(--warn);font-style:normal}
-.metricas{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:6px;margin-top:10px}
-.mi{background:#0a0d12;border:1px solid #1a1e26;border-radius:9px;padding:7px 8px;min-width:0}
-.mil{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
-.mil .ic{width:12.5px;height:12.5px;color:var(--gold)}
-.miv{font-size:13px;font-weight:600;color:#fff;margin-top:3px;word-break:break-word}
-.miv.sd{color:#6d6862;font-weight:400;font-style:italic;font-size:12px}
-.minota{font-size:10px;color:var(--dim);margin-top:2px;word-break:break-word}
-.bar{height:3px;background:#1a1e26;border-radius:3px;margin-top:5px;overflow:hidden}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad))}
-.act{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
-.act span{font-size:10px;padding:2px 7px;border-radius:20px;background:#131a24;border:1px solid #24303f;color:#bcd0e6}
-.perfil .nota{font-size:10.5px;color:var(--gold2);margin-top:8px;background:#12100a;border:1px solid #3a3018;border-radius:8px;padding:7px 9px;word-break:break-word}
-.cmdtit{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:11px 0 6px;border-top:1px solid #171b22;padding-top:8px;display:flex;align-items:center;gap:5px}
-.cmds{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:6px}
-.cmds button{display:block}
-.cmds .ic{color:var(--gold);width:17px;height:17px;margin-bottom:3px}
-.cmds button b{font-size:12px}
-.cmds button small{display:block;font-size:9.5px;line-height:1.3;margin-top:1px}
-.cmds button.off{background:#0b0e13;border-color:#1c1f26;color:#6d6862;cursor:not-allowed}
-.cmds button.off .ic{color:#5a564f}
-.cmds button.off b{color:#8a857d;font-weight:500}
-.cmds button.off small{color:#7a6a52}
-.ult{border-top:1px solid #171b22;margin-top:9px;padding-top:7px;font-size:10.5px;color:var(--dim);word-break:break-word}
-.ult b{color:var(--gold2);font-weight:600}
-.vistas{display:grid;grid-template-columns:1fr;gap:9px}
-@media(min-width:760px){.vistas.dos{grid-template-columns:1fr 1fr}}
-.vista img{width:100%;border-radius:8px;border:1px solid var(--line);background:#000;display:block}
-.vista .pie{font-size:10.5px;color:var(--dim);margin-bottom:4px;display:flex;justify-content:space-between;gap:6px}
-.audio{width:100%;margin-top:5px;height:32px}
-.fila{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #171b22;font-size:11.5px}
-.fila:last-child{border:0}
-.fila span:last-child{color:var(--dim);white-space:nowrap}
-.cr{font-size:11.5px;color:var(--dim)}
-.caja{margin-top:8px;display:flex;gap:6px}
-input{flex:1;background:#0a0d12;border:1px solid #2a3140;border-radius:8px;color:#fff;padding:9px;font-family:inherit;font-size:12.5px}
-footer{margin-top:20px;text-align:center;color:#5f5b54;font-size:10px;line-height:1.6}
-/* ================= JERARQUIA: leer el estado en 2 segundos =================
-    Regla del rediseño: arriba SOLO lo que pide atención; el detalle se despliega.
-    Todo lo que nunca cambia o siempre sale vacío baja a una línea muda. */
-.general{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-left:4px solid var(--dim);
-   background:var(--card);border-radius:12px;padding:11px 14px;margin:0 0 9px}
-.general.critico{border-left-color:var(--bad);background:linear-gradient(90deg,#1c0f0e,var(--card) 62%)}
-.general.atencion{border-left-color:var(--warn);background:linear-gradient(90deg,#1a150b,var(--card) 62%)}
-.general.bien{border-left-color:var(--ok)}
-.general .gv{font-size:20px;font-weight:700;line-height:1.12;letter-spacing:-.01em}
-.general.critico .gv{color:var(--bad)}
-.general.atencion .gv{color:var(--warn)}
-.general.bien .gv{color:var(--ok)}
-.general .gs{font-size:11.5px;color:var(--dim);margin-top:2px}
-.general .gd{margin-left:auto;text-align:right;font-size:10.5px;color:var(--dim);white-space:nowrap;line-height:1.5}
-.atien{margin:0 0 6px}
-.atien .ai{display:flex;align-items:baseline;gap:8px;font-size:12.5px;padding:7px 11px;border-radius:9px;
-   border:1px solid var(--line);background:var(--card);margin-bottom:5px}
-.atien .ai.critico{border-color:#5c2f2f;background:#170e0d}
-.atien .ai.atencion{border-color:#5a4a1e;background:#15110a}
-.atien .ai.critico b{color:var(--bad)}
-.atien .ai.atencion b{color:var(--warn)}
-.atien .ai .aq{margin-left:auto;color:var(--dim);font-size:10.5px;white-space:nowrap}
-.atien .nada{font-size:12px;color:var(--dim);padding:1px 2px 2px}
-/* fila de equipo: siempre visible y comparable; el detalle vive en .cuerpo */
-.perfil{padding:9px 12px}
-.filaEq{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;padding:1px 0;
-   text-align:left;cursor:pointer;color:inherit;font:inherit}
-.filaEq:hover .fnom{color:var(--gold2)}
-.filaEq .punto{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#4a4d55}
-.filaEq .punto.bueno{background:var(--ok)}
-.filaEq .punto.atencion{background:var(--warn)}
-.filaEq .punto.critico{background:var(--bad);animation:p 1.6s infinite}
-.filaEq .avatar{width:32px;height:32px;border-radius:9px;flex:0 0 auto}
-.filaEq .avatar svg{width:21px;height:21px}
-.filaEq .fnom{font-size:13px;font-weight:700;white-space:nowrap}
-.filaEq .frol{font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.filaEq .fsen{margin-left:auto;display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
-.filaEq .fs{font-size:11px;color:var(--dim);white-space:nowrap}
-.filaEq .fs b{color:var(--txt);font-weight:600}
-.filaEq .fs.atencion b{color:var(--warn)}
-.filaEq .fs.critico b{color:var(--bad)}
-.filaEq .chev{flex:0 0 auto;color:var(--dim);font-size:10px;margin-left:2px}
-.perfil.abierto .filaEq .chev{transform:rotate(180deg)}
-.perfil .cuerpo{display:none}
-.perfil.abierto .cuerpo{display:block}
-.pchips{margin-top:8px}
-.sinsensor{font-size:10.5px;color:var(--dim);margin-top:8px;border-top:1px dashed #1e222a;padding-top:7px}
-.bloq{font-size:10.5px;color:var(--dim);margin-top:8px;border-top:1px solid #171b22;padding-top:7px;line-height:1.6}
-.bloq b{color:#8a857d;font-weight:600}
-@media(max-width:600px){
-   .filaEq .frol{display:none}
-   .filaEq .fsen{gap:8px}
-   .filaEq .fs:nth-child(n+4){display:none}
-   .general .gv{font-size:17px}
-}
+  :root{
+    --bg:#0d1117; --bg2:#141b24; --card:#161e28; --line:#243040;
+    --txt:#e8eef6; --dim:#93a4bb; --ok:#2ecc71; --warn:#f0b429; --bad:#ef5350; --acc:#4aa3ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       font-size:16px;line-height:1.5}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+  header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+         border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+  h1{font-size:23px;margin:0;letter-spacing:.2px}
+  .stamp{font-size:14px;color:var(--dim)}
 
-/* ================= ESTILOS PARA LOS TABS ================= */
-.tabs{display:flex;gap:2px;margin-bottom:12px}
-.tabs button{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--dim);padding:9px 12px;font-size:12px;font-family:inherit;font-weight:500;cursor:pointer;transition:.2s}
-.tabs button:hover{color:var(--txt);border-color:var(--gold)}
-.tabs button.active{color:var(--gold);border-color:var(--gold);background:var(--card)}
-.tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .tabs button{background:var(--bg2);border:1px solid var(--line);color:var(--dim);
+               padding:9px 16px;font-size:15px;font-family:inherit;font-weight:600;
+               border-radius:9px;cursor:pointer;transition:.15s}
+  .tabs button:hover{color:var(--txt);border-color:var(--acc)}
+  .tabs button.active{color:#0b1119;background:var(--acc);border-color:var(--acc)}
+  .tabs button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+  .panel{display:none}
+  .panel.active{display:block}
 
-/* Tab content hidden by default */
-.tab-content{display:none}
-.tab-content.active{display:block}
+  #resumen{background:linear-gradient(135deg,#16222f,#111823);border:1px solid var(--line);
+           border-left:4px solid var(--acc);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:17px}
+  #resumen b{color:var(--acc)}
+  .aviso{background:#3a1d1d;border:1px solid #7a2f2f;color:#ffd9d9;border-radius:10px;
+         padding:12px 16px;margin-bottom:16px;font-size:15px;display:none}
 
-/* Resumen specific */
-.resumen .card{margin-bottom:14px}
-.resumen .general{margin:0 0 10px}
-.resumen .vig{margin:0 0 8px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);
+     margin:24px 0 10px;font-weight:600}
+  h2:first-child{margin-top:0}
 
-/* Equipos specific */
-.equipos .perfil{margin-bottom:8px}
-.equipos .metricas{margin-top:6px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card.down{border-color:#5a2a2a;background:#1b1416}
+  .card h3{margin:0 0 10px;font-size:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--ok);flex:none}
+  .dot.off{background:var(--bad)}
+  .dot.warn{background:var(--warn)}
+  .m{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #1e2734;font-size:15px}
+  .m:last-child{border:0}
+  .m span:first-child{color:var(--dim)}
+  .m b{font-variant-numeric:tabular-nums;text-align:right}
+  .bar{height:7px;background:#1e2836;border-radius:4px;overflow:hidden;margin:4px 0 10px}
+  .bar i{display:block;height:100%;background:var(--acc)}
+  .bar i.hi{background:var(--warn)} .bar i.max{background:var(--bad)}
+  .sep{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:14px 0 6px;
+       padding-top:10px;border-top:1px solid var(--line)}
 
-/* Pendientes specific */
-.pendientes .evento{padding:6px 10px;margin:4px 0;border-radius:8px;border:1px solid var(--line);background:var(--card2);font-size:11px}
-.pendientes .evento .equipo{color:var(--gold);font-weight:600}
-.pendientes .evento .hora{color:var(--dim);font-size:9px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#1a2432;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px}
+  .chip.off{background:#241618;border-color:#5a2a2a;color:#ffc9c9}
 
-/* Accesos specific */
-.accesos .progreso{margin-bottom:10px}
-.accesos .paso{color:var(--dim);font-size:11px;margin:2px 0}
-</style></head><body>
+  ul.ev{list-style:none;padding:0;margin:0}
+  ul.ev li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;
+           margin-bottom:8px;font-size:15px;display:flex;gap:12px;justify-content:space-between}
+  ul.ev time{color:var(--dim);font-size:13px;white-space:nowrap}
 
-<!-- ======= ICONOS VECTORIALES (SVG en linea, nada de emojis) ======= -->
-<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
- <symbol id="i-red" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></symbol>
- <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 8.6a15 15 0 0 1 19 0M6.2 12.4a10 10 0 0 1 11.6 0M9.6 16.1a4.6 4.6 0 0 1 4.8 0"/><circle cx="12" cy="19.6" r="1"/></symbol>
- <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><rect x="10.3" y="10.3" width="3.4" height="3.4" rx="1"/><path d="M10 3.4v2.2M14 3.4v2.2M10 18.4v2.2M14 18.4v2.2M3.4 10h2.2M3.4 14h2.2M18.4 10h2.2M18.4 14h2.2"/></symbol>
- <symbol id="i-ram" viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="9.5" rx="2"/><path d="M6.5 7V4.4M10.2 7V4.4M13.8 7V4.4M17.5 7V4.4M7 19.6v-3.1M17 19.6v-3.1M7 10.5h10v2.5H7z"/></symbol>
- <symbol id="i-temp" viewBox="0 0 24 24"><path d="M10 14.7V5.2a2 2 0 1 1 4 0v9.5a4.1 4.1 0 1 1-4 0z"/><circle cx="12" cy="17.3" r="1.4" fill="currentColor" stroke="none"/><path d="M15.6 6.5h3.2M15.6 9.5h2.2M15.6 12.5h3.2"/></symbol>
- <symbol id="i-disco" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><circle cx="7.2" cy="7.5" r="1"/><circle cx="7.2" cy="16.5" r="1"/><path d="M12 7.5h6M12 16.5h3"/></symbol>
- <symbol id="i-gpu" viewBox="0 0 24 24"><rect x="2.5" y="7" width="14.5" height="10" rx="2"/><circle cx="9.7" cy="12" r="3"/><path d="M9.7 9.6V12l2 1.4"/><path d="M17 10h2.6a1.4 1.4 0 0 1 1.4 1.4v1.2a1.4 1.4 0 0 1-1.4 1.4H17"/><path d="M6 17v2.2M12.5 17v2.2"/></symbol>
- <symbol id="i-vram" viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="11" rx="2"/><path d="M7.5 6.5V3.4M12 6.5V3.4M16.5 6.5V3.4M7.5 17.5v3.1M12 17.5v3.1M16.5 17.5v3.1"/></symbol>
- <symbol id="i-bat" viewBox="0 0 24 24"><rect x="2.2" y="7" width="17" height="10" rx="2.5"/><path d="M21.6 10.6v2.8"/><path d="M5.4 10.4h4.2v3.2H5.4z" fill="currentColor" stroke="none"/></symbol>
- <symbol id="i-rayo" viewBox="0 0 24 24"><path d="M13.6 2.5 5.4 13.6h5.1L10 21.5l8.6-11.6h-5.2z"/></symbol>
- <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.2V12l3.6 2.1"/></symbol>
- <symbol id="i-caja" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6.2" rx="1.6"/><rect x="3" y="13.8" width="18" height="6.2" rx="1.6"/><path d="M6.8 7.1h1.6M6.8 16.9h1.6"/></symbol>
- <symbol id="i-sitios" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5z"/><path d="M3 12.6l9 5 9-5"/><path d="M3 16.8l9 5 9-5"/></symbol>
- <symbol id="i-nube" viewBox="0 0 24 24"><path d="M7.2 18.2h9.6a4 4 0 0 0 .4-8 6 6 0 0 0-11.5-1.4 3.9 3.9 0 0 0 1.5 9.4z"/><path d="M12 15.4v-5.2M9.9 12.2 12 10.1l2.1 2.1"/></symbol>
- <symbol id="i-dinero" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6.8v10.4M14.7 9.2c-.7-.9-1.6-1.3-2.7-1.3-1.6 0-2.7.9-2.7 2.2 0 1.4 1.1 1.9 2.7 2.3 1.7.4 2.9.9 2.9 2.4 0 1.4-1.2 2.3-2.9 2.3-1.2 0-2.2-.4-2.9-1.4"/></symbol>
- <symbol id="i-camara" viewBox="0 0 24 24"><path d="M4 8h2.8l1.5-2.3h7.4L17.2 8H20a1.6 1.6 0 0 1 1.6 1.6v7.8A1.6 1.6 0 0 1 20 19H4a1.6 1.6 0 0 1-1.6-1.6V9.6A1.6 1.6 0 0 1 4 8z"/><circle cx="12" cy="13.2" r="3.2"/></symbol>
- <symbol id="i-foto" viewBox="0 0 24 24"><rect x="2.5" y="3.6" width="19" height="13" rx="2"/><path d="M8.6 20.4h6.8M12 16.6v3.8"/><path d="M8.4 10.4l2.3 2.3 4.2-4.8"/></symbol>
- <symbol id="i-reiniciar" viewBox="0 0 24 24"><path d="M20.2 12a8.2 8.2 0 1 1-2.5-5.9"/><path d="M20.4 3.6v4.8h-4.8"/></symbol>
- <symbol id="i-apagar" viewBox="0 0 24 24"><path d="M12 3.2v8.4"/><path d="M6.6 6.6a8 8 0 1 0 10.8 0"/></symbol>
- <symbol id="i-pausa" viewBox="0 0 24 24"><rect x="6.8" y="4.4" width="3.8" height="15.2" rx="1.3"/><rect x="13.4" y="4.4" width="3.8" height="15.2" rx="1.3"/></symbol>
- <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.6v14.8L19.6 12z"/></symbol>
- <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5.4" y="5.4" width="13.2" height="13.2" rx="2.6"/></symbol>
- <symbol id="i-escoba" viewBox="0 0 24 24"><path d="M20.2 3.8 11 13"/><path d="M14.4 6.6l3 3"/><path d="M9.6 13.2c-2.6.7-4.4 2.6-5 6.4 3.8-.6 5.7-2.4 6.4-5z"/></symbol>
- <symbol id="i-llave" viewBox="0 0 24 24"><circle cx="8.2" cy="8.2" r="4.4"/><path d="M11.4 11.4 20.6 20.6M15.4 15.4l2.2-2.2M18 18l2.2-2.2"/></symbol>
- <symbol id="i-candado" viewBox="0 0 24 24"><rect x="4.4" y="10.4" width="15.2" height="9.6" rx="2.2"/><path d="M8 10.4V8a4 4 0 0 1 8 0v2.4"/></symbol>
- <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2.4 12S6 5.8 12 5.8 21.6 12 21.6 12 18 18.2 12 18.2 2.4 12 2.4 12z"/><circle cx="12" cy="12" r="2.9"/></symbol>
- <symbol id="i-salud" viewBox="0 0 24 24"><path d="M2.4 12.4h4l2-4.4 3.2 8.6 2.5-6 1.6 3.4h5.9"/></symbol>
- <symbol id="i-aviso" viewBox="0 0 24 24"><path d="M12 3.8 2.8 20h18.4z"/><path d="M12 9.6v4.6M12 17.2h.01"/></symbol>
- <symbol id="i-ia" viewBox="0 0 24 24"><rect x="3.6" y="7.4" width="16.8" height="11.2" rx="3"/><path d="M12 4v3.4"/><circle cx="9" cy="13" r="1.3"/><circle cx="15" cy="13" r="1.3"/></symbol>
- <symbol id="i-micro" viewBox="0 0 24 24"><rect x="7" y="2.6" width="10" height="18.8" rx="2.6"/><path d="M10.6 5.2h2.8"/><circle cx="12" cy="18" r="1"/></symbol>
- <symbol id="i-android" viewBox="0 0 24 24"><path d="M5.6 13.4a6.4 6.4 0 0 1 12.8 0z"/><path d="M8.8 9.4 7 7.4M15.2 9.4 17 7.4"/><path d="M7.2 13.4v4a1.8 1.8 0 0 0 1.8 1.8h6a1.8 1.8 0 0 0 1.8-1.8v-4"/><circle cx="9.6" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="14.4" cy="11.2" r=".7" fill="currentColor" stroke="none"/></symbol>
- <symbol id="i-mundo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></symbol>
- <symbol id="i-perfil" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.8"/><path d="M4.6 20.4c.9-3.7 3.9-5.7 7.4-5.7"/></symbol>
-</svg>
+  .viejo{background:var(--warn);color:#2a1f00;font-size:12px;font-weight:700;border-radius:5px;
+         padding:2px 7px;margin-left:8px;vertical-align:middle}
+  .off-tag{background:#3a1d1d;color:#ffd9d9;border:1px solid #7a2f2f;font-size:12px;font-weight:700;
+           border-radius:5px;padding:2px 7px;margin-left:8px;vertical-align:middle}
 
+  .links{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .link{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:14px 16px;text-decoration:none;color:var(--txt);transition:.15s}
+  .link:hover{border-color:var(--acc);background:#18222f}
+  .link b{display:block;font-size:16px;color:#fff;margin-bottom:2px}
+  .link small{color:var(--dim);font-size:13px}
+  .link code{color:var(--acc);font-size:12px;word-break:break-all}
+
+  .foot{margin-top:30px;color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:12px}
+  .foot code{color:var(--acc)}
+</style>
+</head>
+<body>
 <div class="wrap">
+  <header>
+    <h1>Panel del enjambre</h1>
+    <div class="stamp" id="sello">cargando…</div>
+  </header>
 
-<header>
-  <div><div class="kick">Enjambre · Óscar Omar GP</div><h1>Centro de control</h1></div>
-  <div class="live"><span class="dot"></span>en vivo<br><span id="act">…</span></div>
-</header>
+  <div class="aviso" id="aviso"></div>
 
-<nav class="tira">
-  <a href="#vigilancia">Ahora mismo</a><a href="#herramientas">Herramientas</a><a href="#remoto">Control remoto</a><a href="#equipos">Equipos</a><a href="#rapido">Control rápido</a>
-  <a href="#pantallas">Pantallas</a><a href="#camaras">Cámaras y audio</a><a href="#registro">Registro</a><a href="#trabajos">Trabajos</a>
-</nav>
+  <nav class="tabs" role="tablist" aria-label="Secciones del panel">
+    <button class="active" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+    <button role="tab" data-tab="equipos" aria-selected="false">Equipos</button>
+    <button role="tab" data-tab="herramientas" aria-selected="false">Herramientas</button>
+    <button role="tab" data-tab="accesos" aria-selected="false">Accesos</button>
+  </nav>
 
-<div id="ultimaOrden" style="display:none;position:sticky;top:0;z-index:9;margin:-10px -10px 8px;padding:9px 14px;background:#12202b;border-bottom:1px solid var(--gold);font-size:12px;color:var(--txt)"></div>
+  <section class="panel active" id="resumen">
+    <div id="resumen-frase">Leyendo el estado de los equipos…</div>
+    <h2>Equipos del enjambre</h2>
+    <div class="grid" id="resumen-equipos"></div>
+    <h2>Trabajos</h2>
+    <div class="card" id="resumen-trabajos"><span class="m"><span>Sin datos</span></span></div>
+    <h2>Últimos eventos</h2>
+    <ul class="ev" id="resumen-eventos"></ul>
+  </section>
 
-<div id="general" class="general"><div><div class="gv">Consultando…</div><div class="gs"></div></div></div>
+  <section class="panel" id="equipos">
+    <h2>Métricas por equipo</h2>
+    <div class="grid" id="lista-equipos"></div>
+  </section>
 
-<div class="vig" id="vigilancia">
-  <span id="vPantallas"><svg class="ic"><use href="#i-ojo"></use></svg> pantallas: …</span>
-  <span id="vCamaras"><svg class="ic"><use href="#i-camara"></use></svg> cámaras: …</span>
-  <span id="vPausa"><svg class="ic"><use href="#i-pausa"></use></svg> pausa: …</span>
-  <span id="vSalud" style="display:none"><svg class="ic"><use href="#i-salud"></use></svg> equipos: …</span>
-</div>
+  <section class="panel" id="herramientas">
+    <h2>Herramientas del enjambre</h2>
+    <div class="links" id="lista-herramientas"></div>
+  </section>
 
-<div class="card lock off" id="candado">
-  <div class="t"><span id="lockT">Trabajando ahora</span><span id="lockN"></span></div>
-  <div class="big" id="lockBig">Consultando…</div>
-  <div class="sub" id="lockSub"></div>
-  <div class="latido" id="lockLat"></div>
-</div>
+  <section class="panel" id="accesos">
+    <h2>Accesos rápidos</h2>
+    <div class="links" id="lista-accesos"></div>
+  </section>
 
-<h2 id="herramientas"><svg class="ic"><use href="#i-perfil"></use></svg> Herramientas <span class="cr" style="text-transform:none;letter-spacing:0">— se abren en otra pestaña</span></h2>
-<div style="display:flex;flex-wrap:wrap;gap:9px;margin:0 0 16px">
-  <a href="/panel/consola.html" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Consola en vivo</b><br><small style="color:#7fbf9d">qué está pasando ahora</small></a>
-  <a href="/panel/" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Centro de control</b><br><small style="color:#7fbf9d">esta misma página</small></a>
-  <a href="https://nexus.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Tareas (Nexus)</b><br><small style="color:#7fbf9d">pendientes, dinero, clientes</small></a>
-  <a href="https://files.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Archivos</b><br><small style="color:#7fbf9d">documentos y respaldos</small></a>
-  <a href="https://musica.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Música</b><br><small style="color:#7fbf9d">tu biblioteca</small></a>
-  <a href="https://webmail.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Webmail</b><br><small style="color:#7fbf9d">correo del dominio</small></a>
-  <a href="https://n8n.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Automatización (n8n)</b><br><small style="color:#7fbf9d">flujos y bots</small></a>
-  <a href="https://multimedia.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Multimedia</b><br><small style="color:#7fbf9d">películas y series</small></a>
-  <a href="https://contrasenas.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Contraseñas</b><br><small style="color:#7fbf9d">bóveda segura</small></a>
-  <a href="/panel/enlaces.html" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #4a4a3b;border-radius:9px;text-decoration:none;background:rgba(30,28,15,.45);color:#e0d9b8;font-size:13px;line-height:1.35"><b>Todos los enlaces</b><br><small style="color:#b8af7f">índice completo</small></a>
-  <a href="https://oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Mi sitio</b><br><small style="color:#7fbf9d">lo público</small></a>
-</div>
-
-<h2 id="remoto"><svg class="ic"><use href="#i-ojo"></use></svg> Control remoto (RustDesk)</h2>
-<div class="card" style="border-color:#4a3a1e;background:linear-gradient(180deg,#17130b,#0e1218)">
-  <div style="font-size:11px;color:#b8af7f;margin-bottom:8px">Ver la pantalla y controlar el teclado/ratón de otra máquina (como TeamViewer). Abre <b>RustDesk</b> en cualquier equipo, escribe el ID y conecta.</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
-    <div style="border:1px solid #3a3d45;border-radius:9px;padding:10px 12px;background:#0d1016">
-      <div style="font-size:9.5px;letter-spacing:.16em;color:#98938a;text-transform:uppercase">F16 (Windows)</div>
-      <div style="font-family:Consolas,Menlo,monospace;font-size:22px;color:#e8d9a8;margin:4px 0">58233216</div>
-      <div style="font-size:10px;color:#98938a">GPU RTX 4050 · diseño y video</div>
-    </div>
-    <div style="border:1px solid #3a3d45;border-radius:9px;padding:10px 12px;background:#0d1016">
-      <div style="font-size:9.5px;letter-spacing:.16em;color:#98938a;text-transform:uppercase">Vivobook Go (Linux)</div>
-      <div style="font-family:Consolas,Menlo,monospace;font-size:22px;color:#e8d9a8;margin:4px 0">59219535</div>
-      <div style="font-size:10px;color:#98938a">Linux Mint · desarrollo</div>
-    </div>
+  <div class="foot">
+    Datos: <code>estado-enjambre.json</code> (cada 5 min) y <code>eventos.json</code>.
+    Si un dato tiene más de 15 minutos se marca <b>DATO VIEJO</b>; si un equipo no reporta dice
+    <b>SIN CONEXIÓN</b> — nunca se muestra un cero inventado.
+    Ver también <a href="consola.html" style="color:#4aa3ff">la consola del enjambre</a>.
   </div>
-  <div style="font-size:10px;color:#98938a;margin-top:8px">Servidor propio: 173.224.115.243 (no pasa por servidores de terceros).</div>
 </div>
-
-/* ================= TABS PRINCIPALES ================= */
-.tabs{display:flex;gap:2px;margin-bottom:12px}
-.tabs button{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--dim);padding:9px 12px;font-size:12px;font-family:inherit;font-weight:500;cursor:pointer;transition:.2s}
-.tabs button:hover{color:var(--txt);border-color:var(--gold)}
-.tabs button.active{color:var(--gold);border-color:var(--gold);background:var(--card)}
-.tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2}
-
-.tab-content{display:none}
-.tab-content.active{display:block}
-
-/* ---------- RESUMEN ---------- */
-#resumen{padding:12px 0}
-.resumen .card{margin-bottom:14px}
-.resumen .general{margin:0 0 10px}
-.resumen .vig{margin:0 0 8px}
-.resumen .mi{min-width:130px}
-
-/* ---------- EQUIPOS ---------- */
-#equipos{padding:12px 0}
-.equipos .perfil{margin-bottom:8px}
-.equipos .metricas{margin-top:6px}
-
-/* ---------- PENDIENTES ---------- */
-#pendientes{padding:12px 0}
-.pendientes .evento{padding:6px 10px;margin:4px 0;border-radius:8px;border:1px solid var(--line);background:var(--card2);font-size:11px}
-.pendientes .evento .equipo{color:var(--gold);font-weight:600}
-.pendientes .evento .hora{color:var(--dim);font-size:9px}
-
-/* ---------- ACCESOS ---------- */
-#accesos{padding:12px 0}
-.accesos .progreso{margin-bottom:10px}
-.accesos .paso{color:var(--dim);font-size:11px;margin:2px 0}
-
-/* Cuando no hay datos de equipo */
-.sin-conexion{padding:20px 10px;text-align:center;color:var(--dim);font-size:13px}
-.dato-viejo{display:inline-block;background:var(--warn);color:var(--negro);padding:3px 6px;border-radius:10px;font-size:10px;margin-left:6px;vertical-align:middle}
-
-/* ---------- LOG ---------- */
-#log .cr{font-size:11px}
-</script>
 
 <script>
-/* ---------- utilidades ---------- */
-function tieneDato(m){return !(m.valor===null||m.valor===undefined||m.valor==='')}
-function esNoAplica(m){
-  if(tieneDato(m)) return false;
-  return /no tiene|no aplica|sin sensor|no trae|no cuenta|no dispone|no la tiene/i.test(m.nota||'');
-}
-function nivelPct(p){const n=Number(p);if(isNaN(n))return '';return n>=90?'critico':(n>=75?'atencion':'')}
-function esc(s){return String(s===null||s===undefined?'':s).replace(/[&<>"']/g,function(c){return({'&':'&','<':'<','>':'>','"':'"',"'":'''})[c]})}
-function fmtHoraISO(iso){if(!iso)return '';const d=new Date(iso);return d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
-function edadDato(isoStr){if(!isoStr)return null;const ms=new Date(isoStr).getTime();const ahora=Date.now();const diff=((ahora-ms)/60000);return diff} // minutos
+const LIMITE_MIN = 15;
 
-/* ---------- formatear metrica ---------- */
-function metrica(m){
-  const sd = !tieneDato(m);
-  const val = sd ? '<span class="sd">sin dato</span>' : esc(m.valor);
-  const pct = m.pct!==null&&m.pct!==undefined?barra(m.pct):''
-  const nota = m.nota?'<div class="minota">'+esc(m.nota)+'</div>':''
-  const staleClass = edadDato(m.fecha)?' dato-viejo':''
-  const staleLabel = edadDato(m.fecha)&&edadDato(m.fecha)>15?'<span class="dato-viejo">DATO VIEJO</span>':''
-  return '<div class="mi'+(m.ancho?' ancho':'')+'"><div class="mil">'+ic(m.ico)+'<span>'+esc(m.etq)+'</span></div>'
-       + '<div class="miv'+(sd?' sd':'')+'">'+val+'</div>'
-       + pct + staleLabel + nota + '</div>';
+function haceCuanto(iso){
+  if(!iso) return null;
+  const t = new Date(iso).getTime();
+  if(isNaN(t)) return null;
+  return Math.round((Date.now() - t) / 60000);
 }
+function edadTexto(min){
+  if(min === null) return '';
+  if(min < 1) return 'hace segundos';
+  if(min < 60) return 'hace ' + min + ' min';
+  const h = Math.round(min/60);
+  return 'hace ' + h + ' h';
+}
+function esc(s){
+  return String(s === undefined || s === null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function esNumero(x){ return typeof x === 'number' && !isNaN(x); }
+function barra(pct){
+  if(!esNumero(pct)) return '';
+  const p = Math.max(0, Math.min(100, pct));
+  const cls = p >= 90 ? 'max' : (p >= 70 ? 'hi' : '');
+  return '<div class="bar"><i class="' + cls + '" style="width:' + p + '%"></i></div>';
+}
+function fila(k, v){ return '<div class="m"><span>' + k + '</span><b>' + v + '</b></div>'; }
 
-/* ---------- verificar edad de datos ---------- */
-function verificarEdadDatos(datos){
-  const ahora=Date.now();
-  Object.keys(datos).forEach(function(key){
-    const item=datos[key];
-    if(item && item.actualizado){
-      const diffMin=edadDato(item.actualizado);
-      if(diffMin!==null && diffMin>15){
-        // marcado como dato viejo - se hará en el render
-      }
-    }
-  })
+async function trae(archivo){
+  const r = await fetch(archivo + '?t=' + Date.now(), {cache:'no-store'});
+  if(!r.ok) throw new Error(archivo + ' ' + r.status);
+  return r.json();
 }
 
-/* ---------- carga de datos ---------- */
-async function cargarDatos(){
-  const now=Date.now();
-  try{
-    // Cargar estado-enjambre.json
-    const resp=await(await fetch('estado-enjambre.json?t='+now,{cache:'no-store'})).json();
-    window.estadoEnjambre=resp;
-    actualizarResumen(resp);
-    actualizarEquipos(resp);
-  }catch(e){
-    console.error('Error cargando estado-enjambre:', e);
-    document.getElementById('lista-equipos').innerHTML='<div class="sin-conexion">SIN CONEXIÓN</div>';
+// Definición las cuatro máquinas. metrica: qué objeto de estado-enjambre.json le corresponde.
+const EQUIPOS = [
+  {clave:'servidor',  nombre:'Servidor (VPS)',  metrica:'vps',       origen:'vps'},
+  {clave:'taller',    nombre:'Taller',          metrica:'taller',    origen:'taller'},
+  {clave:'f16',       nombre:'F16',             metrica:null,        origen:'enjambre'},
+  {clave:'vivobook',  nombre:'Vivobook',        metrica:null,        origen:'enjambre'},
+  {clave:'centenario',nombre:'Centenario',      metrica:null,        origen:'enjambre'}
+];
+
+// ¿El equipo reporta en línea? Devuelve el texto tal cual viene.
+function estadoTexto(est, eq){
+  const enj = (est && est.enjambre) || {};
+  const v = enj[eq.clave];
+  if(v === undefined || v === null || v === '') return null;
+  return String(v);
+}
+function enLinea(txt){
+  return !!txt && txt.toLowerCase().indexOf('en linea') === 0;
+}
+
+const IA = { tokens:null, usd:null, mxn:null }; // leído de estado-enjambre.json si existe
+const AGENTES = {};                             // agentes trabajando por equipo (si el JSON los trae)
+
+function tarjetaResumen(est, eq, viejo){
+  const txt = estadoTexto(est, eq);
+  const hayTexto = txt !== null;
+  const online = enLinea(txt);
+
+  // Sin reporte de estado => SIN CONEXIÓN (nunca cero inventado).
+  if(!hayTexto){
+    return '<div class="card down"><h3><span class="dot off"></span>' + eq.nombre +
+           '<span class="off-tag">SIN CONEXIÓN</span></h3>' +
+           fila('Estado', 'no reporta') + '</div>';
   }
-}
-
-/* ---------- RESUMEN ---------- */
-function actualizarResumen(d){
-  const r=d.resumo||{};
-  const e=d.equipos||[];
-  vivos=e.filter(x=>x.vivo).length;
-  // Estado global
-  let eg='bien'; let tot=vivos+e.length;
-  e.forEach(function(x){if((x.salud||{}).nivel==='critico'||(x.salud||{}).nivel==='atencion')eg='atencion'})
-  const gv={critico:'Crítico',atencion:'Pide atención',bien:'Todo en orden'}[eg];
-  const gs=(eg==='atencion'?(''+(e.length-vivos)+' con aviso · '+vivos+' en línea'):(vivos+' de '+e.length+' en línea · nada pendiente'))
-  document.getElementById('general').className='general '+eg;
-  document.getElementById('general').innerHTML='<div><div class="gv">'+esc(gv)+'</div><div class="gs">'+esc(gs)+'</div></div>'
-    +'<div class="gd">en línea: '+vivos+'/'+e.length+' actualizado '+esc(d.hora_local||'')+'</div>';
-
-  // Métricas VPS
-  const v=d.vps||{};
-  document.getElementById('vPantallas').innerHTML='<svg class="ic"><use href="#i-nube"></use></svg> pantallas: '+ (v.contenedores||0) +' contenedores';
-  document.getElementById('vCamaras').innerHTML='<svg class="ic"><use href="#i-camara"></use></svg> cámaras: '+(v.servidor?'en línea':'desconectada');
-  document.getElementById('vPausa').innerHTML='<svg class="ic"><use href="#i-pausa"></use></svg> pausa: '+(r.pausa?'SÍ · '+r.pausa:( 'no'));
-
-  // Carga y RAM
-  const cpuLoad = Math.round((v.carga||0)*10)/10;
-  document.getElementById('act').textContent='actualizado '+ (d.hora_local||'');
-
-  // Tarjetas de métricas del resumen
-  const metricsDiv=document.createElement('div');
-  metricsDiv.className='metricas';
-  const cpuMi='<div class="mi"><div class="mil">'+ic('cpu')+'<span>Carga CPU</span></div><div class="miv">'+cpuLoad+'</div><div class="bar"><i style="width:'+((v.carga||0)/((v.cpus||1)*100)*100)+'%"></i></div></div>';
-  const ramMi='<div class="mi"><div class="mil">'+ic('ram')+'<span>RAM</span></div><div class="miv">'+(v.ram_pct||0)+'%</div><div class="bar"><i style="width:'+(v.ram_pct||0)+'%"></i></div></div>';
-  const discoMi='<div class="mi"><div class="mil">'+ic('disco')+'<span>Disco</span></div><div class="miv">'+(v.disco_pct||0)+'%</div><div class="bar"><i style="width:'+(v.disco_pct||0)+'%"></i></div></div>';
-  document.getElementById('resumen').appendChild(metricsDiv).innerHTML=cpuMi+ramMi+discoMi;
-}
-
-/* ---------- EQUIPOS ---------- */
-function actualizarEquipos(d){
-  const e=d.enjambre||{};
-  const v=d.vps||{};
-  const t=d.taller||{};
-  const equipos=[
-    {clave:'servidor',nombre:'Servidor',tipo:'servidor',salud:{nivel:'bien'},metricas:[
-      {etq:'Carga',pct:v.carga,ico:'cpu',ancho:true},
-      {etq:'RAM',pct:v.ram_pct,ico:'ram'},
-      {etq:'Disco',pct:v.disco_pct,ico:'disco'}
-    ]},
-    {clave:'f16',nombre:'F16',tipo:'servidor',salud:{nivel:e.f16==='en linea'?'bien':'atencion'},metricas:[
-      {etq:'Carga',pct:v?v.carga:undefined,ico:'cpu'},
-      {etq:'RAM',pct:undefined,ico:'ram'},
-      {etq:'Disco',pct:undefined,ico:'disco'}
-    ]},
-    {clave:'vivobook',nombre:'Vivobook',tipo:'servidor',salud:{nivel:e.vivobook==='en linea'?'bien':'atencion'},metricas:[
-      {etq:'Carga',pct:v?v.carga:undefined,ico:'cpu'},
-      {etq:'RAM',pct:undefined,ico:'ram'},
-      {etq:'Disco',pct:undefined,ico:'disco'}
-    ]},
-    {clave:'centenario',nombre:'Centenario',tipo:'servidor',salud:{nivel:e.centenario==='en linea'?'bien':'atencion'},metricas:[
-      {etq:'Carga',pct:v?v.carga:undefined,ico:'cpu'},
-      {etq:'RAM',pct:undefined,ico:'ram'},
-      {etq:'Disco',pct:undefined,ico:'disco'}
-    ]},
-    {clave:'taller',nombre:'Taller',tipo:'servidor',salud:{nivel:'bien'},metricas:[
-      {etq:'Carga',pct:t.carga||0,ico:'cpu',ancho:true},
-      {etq:'RAM',pct:t.ram_pct||0,ico:'ram'},
-      {etq:'Disco',pct:t.disco_pct||0,ico:'disco'}
-    ]},
-    {clave:'xiaomi_14t',nombre:'Xiaomi 14t',tipo:'servidor',salud:{nivel:e.xiaomi_14t==='desconectada'?'muerto':'atencion'},metricas:[
-      {etq:'Carga',pct:undefined,ico:'cpu'},
-      {etq:'RAM',pct:undefined,ico:'ram'},
-      {etq:'Disco',pct:undefined,ico:'disco'}
-    ]},
-    {clave:'pixel_9a',nombre:'Pixel 9a',tipo:'servidor',salud:{nivel:e.pixel_9a==='desconectada'?'muerto':'atencion'},metricas:[
-      {etq:'Carga',pct:undefined,ico:'cpu'},
-      {etq:'RAM',pct:undefined,ico:'ram'},
-      {etq:'Disco',pct:undefined,ico:'disco'}
-    ]}
-  ];
-  document.getElementById('lista-equipos').innerHTML='';
-  equipos.forEach(function(eq){
-    const existe=(eq.clave==='servidor'||eq.clave==='f16'||eq.clave==='vivobook'||eq.clave==='centenario'||eq.clave==='taller');
-    const card=document.createElement('div');
-    if(!existe){
-      card.className='perfil apagado sin-conexion';
-      card.innerHTML='<div class="filaEq"><span class="punto '+eq.salud.nivel+'"></span><div class="avatar">'+(AVATARES[eq.tipo]||AVATARES.desconocido)+'</div><span class="fnom">'+esc(eq.nombre)+'</span><span class="frol">'+esc(eq.rol||'')+'</span><span class="fsen"></span></div><div class="cuerpo"><div class="sinsensor">SIN CONEXIÓN — el equipo no responde</div></div>';
-    }else{
-      // Determinar salud
-      const status=e[eq.clave]||'desconectada';
-      let nivel='bien'; let chipColor='vivo';
-      if(status==='desconectada'){nivel='muerto';chipColor='muerto'}
-      else if(status!=='en linea'){nivel='atencion';chipColor='atencion'}
-      
-      let html='<div class="filaEq"><span class="punto '+nivel+'"></span><div class="avatar">'+(AVATARES[eq.tipo]||AVATARES.desconocido)+'</div><span class="fnom">'+esc(eq.nombre)+'</span><span class="frol">'+esc(eq.rol||'')+'</span><span class="fsen">';
-      // Señales numéricas ordenadas por compromiso
-      const conDato=eq.metricas.filter(function(m){return tieneDato(m)});
-      const orden=conDato.filter(function(m){return m.etq!=='Red'}).sort(function(a,b){return (Number(b.pct)||0)-(Number(a.pct)||0)});
-      const sen=orden.slice(0,3).map(function(m){return '<span class="fs '+nivelPct(m.pct)+'">'+esc(m.etq)+' <b>'+esc(m.valor||'')+'</b></span>'}).join('');
-      html+=sen+'<span class="chev">&#9660;</span></span></div>';
-      html+='<div class="cuerpo"><div class="pchips"><span class="chip '+chipColor+'">'+ic(e.vivo?'salud':'aviso')+(e.vivo?'EN LÍNEA':'SIN RESPUESTA')+'</span></div>';
-      html+='<div class="metricas">'+eq.metricas.map(function(m){return metrica(m)}).join('')+'</div>';
-      html+='</div></div>';
-      card.innerHTML=html;
-    }
-    document.getElementById('lista-equipos').appendChild(card);
-  });
-}
-
-/* ---------- PENDIENTES ---------- */
-function actualizarPendientes(d){
-  const eventos=d.eventos||[];
-  const trabajos=d.trabajos||[];
-  const hist=trabajos.filter(function(t){return t.estado&&(t.estado==='corriendo'||t.estado==='error')})
-  let html='';
-  // Últimos eventos
-  const ultimos=eventos.slice(0,20);
-  ultimos.forEach(function(ev){
-    const cls=ev.texto.includes('AVISO')?'si':(ev.texto.includes('Respaldo')?'': '');
-    html+='<div class="evento"><span class="equipo">'+esc(ev.equipo||'')+'</span> · '+esc(ev.texto)+'<span class="hora">('+esc(ev.hora||'')+')</span></div>'
-  });
-  // Trabajos en curso
-  if(hist.length){
-    html+='<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:8px"><b>Trabajos en curso:</b></div>';
-    hist.slice(0,5).forEach(function(t){
-      html+='<div class="evento"><span class="equipo">'+esc(t.equipo||'')+'</span> · '+esc(t.titulo||'')+' <span class="hora">('+esc(t.desde||'')+')</span> <span style="color:var(--bad);font-size:10px">estado: '+esc(t.estado||'')+'</span></div>'
-    })
+  if(!online){
+    let h = '<div class="card down"><h3><span class="dot off"></span>' + eq.nombre +
+            '<span class="off-tag">SIN CONEXIÓN</span></h3>';
+    h += fila('Estado', esc(txt));
+    h += fila('Agentes trabajando', '<span style="color:#93a4bb">sin dato</span>');
+    h += fila('IA del día', '<span style="color:#93a4bb">sin dato</span>');
+    return h + '</div>';
   }
-  document.getElementById('pendientes').innerHTML=html||'<div style="color:var(--dim)">No hay eventos pendientes.</div>';
+
+  const m = eq.metrica ? (est[eq.metrica] || {}) : {};
+  const dot = viejo ? 'warn' : '';
+  let h = '<div class="card"><h3><span class="dot ' + dot + '"></span>' + eq.nombre +
+          (viejo ? '<span class="viejo">DATO VIEJO</span>' : '') + '</h3>';
+
+  if(eq.metrica && esNumero(m.carga)){
+    h += fila('Carga', esc(m.carga) + ' / ' + esc(m.cpus || '?') + ' cpu');
+    h += barra((m.carga / (m.cpus || 1)) * 100);
+  }
+  h += fila('CPU', esNumero(m.cpu_uso) ? esc(m.cpu_uso) + '%' : 'sin dato');
+  h += fila('RAM', esNumero(m.ram_pct) ? esc(m.ram_pct) + '%' + (m.ram_total_gb ? ' de ' + esc(m.ram_total_gb) + ' GB' : '') : 'sin dato');
+  h += barra(m.ram_pct);
+  h += fila('Disco', esNumero(m.disco_pct) ? esc(m.disco_pct) + '%' + (m.disco_libre ? ' · ' + esc(m.disco_libre) + ' libres' : '') : 'sin dato');
+  h += barra(m.disco_pct);
+
+  // Qué está haciendo: agentes trabajando + consumo de IA del día
+  h += '<div class="sep">Qué está haciendo</div>';
+  const ag = AGENTES[eq.clave];
+  h += fila('Agentes trabajando', esNumero(ag) ? esc(ag) : '<span style="color:#93a4bb">sin dato</span>');
+  if(esNumero(IA.tokens) || esNumero(IA.usd) || esNumero(IA.mxn)){
+    let ia = [];
+    if(esNumero(IA.tokens)) ia.push(esc(IA.tokens.toLocaleString('es-MX')) + ' tokens');
+    if(esNumero(IA.usd)) ia.push('US$' + esc(IA.usd.toFixed(2)));
+    if(esNumero(IA.mxn)) ia.push('$' + esc(IA.mxn.toFixed(2)) + ' MXN');
+    h += fila('IA del día', ia.join(' · '));
+  } else {
+    h += fila('IA del día', '<span style="color:#93a4bb">sin dato</span>');
+  }
+  return h + '</div>';
 }
 
-/* ---------- ACCESOS ---------- */
-function actualizarAccesos(d){
-  const progreso=d.progreso||{};
-  const trabajos=d.trabajos||[];
-  let html='';
-  // Resumen de trabajos
-  const total=trabajos.length; const listos=trabajos.filter(function(t){return t.estado==='listo'}).length;
-  const corriendo=trabajos.filter(function(t){return t.estado==='corriendo'}).length;
-  html+='<div class="progreso"><b>Total:</b> '+total+' | <b>Listos:</b> '+listos+' | <b>Corriendo:</b> '+corriendo+'</div>';
-  // Últimos trabajos
-  const ultimos=trabajos.slice(0,8);
-  ultimos.forEach(function(t){
-    html+='<div class="paso">'+esc(t.titulo||'')+' <span style="color:var(--dim);font-size:10px">· '+esc(t.equipo||'')+' · '+esc(t.estado||'')+'</span></div>'
+function tarjetaDetalle(est, eq, viejo){
+  const txt = estadoTexto(est, eq);
+  const hayTexto = txt !== null;
+  const online = enLinea(txt);
+
+  if(!hayTexto || !online){
+    let h = '<div class="card down"><h3><span class="dot off"></span>' + eq.nombre +
+            '<span class="off-tag">SIN CONEXIÓN</span></h3>';
+    h += fila('Estado', hayTexto ? esc(txt) : 'no reporta');
+    h += fila('Agentes trabajando', '<span style="color:#93a4bb">sin dato</span>');
+    h += fila('IA del día', '<span style="color:#93a4bb">sin dato</span>');
+    return h + '</div>';
+  }
+
+  const m = eq.metrica ? (est[eq.metrica] || {}) : {};
+  let h = '<div class="card"><h3><span class="dot ' + (viejo ? 'warn' : '') + '"></span>' + eq.nombre +
+          (viejo ? '<span class="viejo">DATO VIEJO</span>' : '') + '</h3>';
+  h += fila('Estado', esc(txt));
+  if(eq.metrica){
+    h += fila('Modelo CPU', m.cpu_modelo ? esc(m.cpu_modelo) : 'sin dato');
+    h += fila('Carga', esNumero(m.carga) ? esc(m.carga) + ' / ' + esc(m.cpus || '?') + ' cpu' : 'sin dato');
+    h += barra(esNumero(m.carga) ? (m.carga / (m.cpus || 1)) * 100 : null);
+    h += fila('CPU', esNumero(m.cpu_uso) ? esc(m.cpu_uso) + '%' : 'sin dato');
+    h += fila('RAM', esNumero(m.ram_pct) ? esc(m.ram_pct) + '%' + (m.ram_total_gb ? ' de ' + esc(m.ram_total_gb) + ' GB' : '') : 'sin dato');
+    h += barra(m.ram_pct);
+    h += fila('Disco', esNumero(m.disco_pct) ? esc(m.disco_pct) + '%' + (m.disco_libre ? ' · ' + esc(m.disco_libre) + ' libres' : '') : 'sin dato');
+    h += barra(m.disco_pct);
+    h += fila('Temperatura', esNumero(m.temperatura) ? esc(m.temperatura) + ' °C' : 'sin dato');
+    h += fila('GPU', m.gpu ? esc(m.gpu) : 'sin dato');
+    h += fila('Contenedores', esNumero(m.contenedores) ? esc(m.contenedores) : 'sin dato');
+    h += fila('Encendido', esNumero(m.uptime_horas) ? esc(m.uptime_horas) + ' h' : 'sin dato');
+  } else {
+    h += fila('Métricas', 'este equipo no publica CPU/RAM/disco');
+  }
+  h += '<div class="sep">Qué está haciendo</div>';
+  const ag = AGENTES[eq.clave];
+  h += fila('Agentes trabajando', esNumero(ag) ? esc(ag) : '<span style="color:#93a4bb">sin dato</span>');
+  if(esNumero(IA.tokens) || esNumero(IA.usd) || esNumero(IA.mxn)){
+    let ia = [];
+    if(esNumero(IA.tokens)) ia.push(esc(IA.tokens.toLocaleString('es-MX')) + ' tokens');
+    if(esNumero(IA.usd)) ia.push('US$' + esc(IA.usd.toFixed(2)));
+    if(esNumero(IA.mxn)) ia.push('$' + esc(IA.mxn.toFixed(2)) + ' MXN');
+    h += fila('IA del día', ia.join(' · '));
+  } else {
+    h += fila('IA del día', '<span style="color:#93a4bb">sin dato</span>');
+  }
+  return h + '</div>';
+}
+
+// Lee agentes/IA si el JSON los trae (con nombres variados). Nunca inventa.
+function leerIA(est){
+  const ia = est.ia || {};
+  // solo se usa un número si realmente viene en el JSON
+  function num(v){ const n = parseFloat(v); return isFinite(n) ? n : null; }
+  if(ia.tokens !== undefined) IA.tokens = num(ia.tokens);
+  if(ia.deepseek_usd !== undefined) IA.usd = num(ia.deepseek_usd);
+  else if(ia.usd !== undefined) IA.usd = num(ia.usd);
+  if(ia.mxn !== undefined) IA.mxn = num(ia.mxn);
+  const ag = est.agentes || ia.agentes || {};
+  Object.keys(ag).forEach(function(kk){
+    const n = num(ag[kk]);
+    if(n !== null) AGENTES[kk] = n;
   });
-  document.getElementById('accesos').innerHTML=html||'<div style="color:var(--dim)">No hay registros de acceso.</div>';
 }
 
-/* ---------- SVG icon helper ---------- */
-function ic(n){return '<svg class="ic'+(n==='play'||n==='rayo'?' fill':'')+'"><use href="#i-'+n+'"></use></svg>'
+const HERRAMIENTAS = [
+  {nombre:'Nexus (tareas)',   url:'https://nexus.oscaromargp.xyz',         desc:'pendientes, dinero, clientes'},
+  {nombre:'Archivos',         url:'https://files.oscaromargp.xyz',         desc:'documentos y respaldos'},
+  {nombre:'Automatización',   url:'https://n8n.oscaromargp.xyz',           desc:'flujos y bots (n8n)'},
+  {nombre:'Música',           url:'https://musica.oscaromargp.xyz',        desc:'tu biblioteca'},
+  {nombre:'Multimedia',       url:'https://multimedia.oscaromargp.xyz',    desc:'películas y series'},
+  {nombre:'Contraseñas',      url:'https://contrasenas.oscaromargp.xyz',   desc:'bóveda segura'},
+  {nombre:'Webmail',          url:'https://webmail.oscaromargp.xyz',       desc:'correo del dominio'}
+];
 
-/* ---------- iniciar ---------- */
-async function iniciar(){
-  await cargarDatos();
-  // Los otros tabs cargan datos inline desde los JSON locales
-  // Simulamos lectura de archivos locales (mismo dominio, sin http/https a recursos externos)
-  try{
-    const evRes=await(await fetch('eventos.json?t='+Date.now(),{cache:'no-store'})).json();
-    actualizarPendientes(evRes);
-  }catch(e){document.getElementById('pendientes').innerHTML='<div style="color:var(--dim)">No se pudieron cargar los eventos.</div>'}
-  try{
-    const acRes=await(await fetch('progreso.json?t='+Date.now(),{cache:'no-store'})).json();
-    actualizarAccesos(acRes);
-  }catch(e){document.getElementById('accesos').innerHTML='<div style="color:var(--dim)">No se pudieron cargar los accesos.</div>'}
-  // Verificar edad de datos y añadir labels DATO VIEJO donde corresponda
-  setTimeout(function(){
-    const datos=window.estadoEnjambre||{};
-    Object.keys(datos).forEach(function(key){
-      const item=datos[key];
-      if(item && item.actualizado){
-        const diffMin=edadDato(item.actualizado);
-        if(diffMin!==null && diffMin>15){
-          const el=document.querySelector('.miv');
-          if(el) el.innerHTML+=' <span class="dato-viejo">DATO VIEJO</span>';
-        }
-      }
-    });
-  }, 2000);
+const ACCESOS = [
+  {nombre:'Consola del enjambre', url:'consola.html',                      desc:'qué está pasando ahora'},
+  {nombre:'Nexus (tareas)',       url:'https://nexus.oscaromargp.xyz',     desc:'pendientes, dinero, clientes'},
+  {nombre:'Archivos',             url:'https://files.oscaromargp.xyz',     desc:'documentos y respaldos'},
+  {nombre:'Automatización',       url:'https://n8n.oscaromargp.xyz',       desc:'flujos y bots (n8n)'},
+  {nombre:'Música',               url:'https://musica.oscaromargp.xyz',    desc:'tu biblioteca'},
+  {nombre:'Multimedia',           url:'https://multimedia.oscaromargp.xyz',desc:'películas y series'},
+  {nombre:'Contraseñas',          url:'https://contrasenas.oscaromargp.xyz',desc:'bóveda segura'},
+  {nombre:'Webmail',              url:'https://webmail.oscaromargp.xyz',   desc:'correo del dominio'}
+];
+
+function pintarEnlaces(destino, lista){
+  document.getElementById(destino).innerHTML = lista.map(function(l){
+    const externo = /^https?:/i.test(l.url);
+    const txt = externo ? l.url.replace(/^https?:\/\//,'') : l.url;
+    return '<a class="link" href="' + esc(l.url) + '"' + (externo ? ' target="_blank" rel="noopener"' : '') + '>' +
+           '<b>' + esc(l.nombre) + '</b>' +
+           '<small>' + esc(l.desc) + '</small><br>' +
+           '<code>' + esc(txt) + '</code></a>';
+  }).join('');
 }
 
-document.addEventListener('DOMContentLoaded',iniciar);
-
-/* ---------- handlers de orden (mantienen compatibilidad) ---------- */
-function orden(cmd){console.log('Orden:',cmd)}
-function dosPaso(el,cmd){orden(cmd)}
-
-/* ---------- tabs ---------- */
+// Pestañas
 document.querySelectorAll('.tabs button').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tabs button').forEach(function(b){
+      b.classList.remove('active'); b.setAttribute('aria-selected','false');
+    });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    const destino = document.getElementById(btn.getAttribute('data-tab'));
+    if(destino) destino.classList.add('active');
   });
 });
+
+(async function(){
+  const aviso = document.getElementById('aviso');
+  const frase = document.getElementById('resumen-frase');
+
+  let est = null, evs = [];
+  try { est = await trae('estado-enjambre.json'); } catch(e){ est = null; }
+  try { const x = await trae('eventos.json'); evs = (x.eventos || []); } catch(e){ evs = []; }
+
+  pintarEnlaces('lista-herramientas', HERRAMIENTAS);
+  pintarEnlaces('lista-accesos', ACCESOS);
+
+  if(!est){
+    aviso.style.display = 'block';
+    aviso.textContent = 'No se pudo leer el estado del enjambre. El panel no está inventando datos: ' +
+                        'revisar que estado-enjambre.json exista y que el generador esté publicando.';
+    frase.textContent = 'Sin datos de estado.';
+    document.getElementById('sello').textContent = 'sin datos';
+    document.getElementById('resumen-equipos').innerHTML =
+      EQUIPOS.map(function(eq){ return tarjetaResumen(null, eq, false); }).join('');
+    document.getElementById('lista-equipos').innerHTML =
+      EQUIPOS.map(function(eq){ return tarjetaDetalle(null, eq, false); }).join('');
+    document.getElementById('resumen-eventos').innerHTML =
+      '<li><span>Sin eventos registrados</span><time>—</time></li>';
+    return;
+  }
+
+  leerIA(est);
+
+  const min = haceCuanto(est.actualizado);
+  const viejo = (min !== null && min > LIMITE_MIN);
+
+  document.getElementById('sello').innerHTML = (min === null)
+    ? 'sin hora de dato'
+    : ('Último dato: ' + edadTexto(min) + ' · ' + esc(est.fecha_local || '') + ' ' + esc(est.hora_local || '') +
+       (viejo ? '<span class="viejo">DATO VIEJO</span>' : ''));
+
+  if(viejo){
+    aviso.style.display = 'block';
+    aviso.textContent = 'El último dato es de ' + esc(est.fecha_local || '') + ' ' + esc(est.hora_local || '') +
+                        ' (' + edadTexto(min).replace('hace ','hace ') + '). Lo que se ve abajo puede no ser cierto: ' +
+                        'revisar el generador de estado-enjambre.json.';
+  }
+
+  // Resumen en palabras
+  const enj = est.enjambre || {};
+  const conEstado = EQUIPOS.filter(function(eq){ return estadoTexto(est, eq) !== null; });
+  const arriba = EQUIPOS.filter(function(eq){ return enLinea(estadoTexto(est, eq)); }).length;
+  let f = '<b>' + arriba + ' de ' + EQUIPOS.length + '</b> equipos en línea';
+  if(conEstado.length < EQUIPOS.length){
+    f += ' · <b>' + (EQUIPOS.length - conEstado.length) + '</b> sin conexión';
+  }
+  const tra = est.trabajos || {};
+  if(tra.corriendo !== undefined) f += ' · <b>' + esc(tra.corriendo) + '</b> trabajo(s) corriendo';
+  if(tra.pendientes !== undefined) f += ' · <b>' + esc(tra.pendientes) + '</b> pendiente(s)';
+  if(tra.actual) f += '<br>Ahora mismo: ' + esc(tra.actual);
+  const resp = est.respaldo || {};
+  if(resp.estado) f += '<br>Respaldo: ' + esc(resp.estado) + (resp.cuando ? ' (' + esc(resp.cuando) + ')' : '');
+  frase.innerHTML = f;
+
+  // Tarjetas
+  document.getElementById('resumen-equipos').innerHTML =
+    EQUIPOS.map(function(eq){ return tarjetaResumen(est, eq, viejo); }).join('');
+  document.getElementById('lista-equipos').innerHTML =
+    EQUIPOS.map(function(eq){ return tarjetaDetalle(est, eq, viejo); }).join('');
+
+  // Trabajos
+  let tj = '';
+  tj += fila('En curso', esc(tra.actual || 'ninguno'));
+  tj += fila('Corriendo', tra.corriendo !== undefined ? esc(tra.corriendo) : 'sin dato');
+  tj += fila('Pendientes', tra.pendientes !== undefined ? esc(tra.pendientes) : 'sin dato');
+  tj += fila('Terminados', tra.terminados !== undefined ? esc(tra.terminados) : 'sin dato');
+  if(tra.ultimo) tj += fila('Último', esc(tra.ultimo));
+  document.getElementById('resumen-trabajos').innerHTML = tj;
+
+  // Eventos
+  const lista = document.getElementById('resumen-eventos');
+  lista.innerHTML = evs.length
+    ? evs.slice(0, 12).map(function(e){
+        return '<li><span>' + esc(e.texto || '') + '</span><time>' + esc(e.hora || '') + '</time></li>';
+      }).join('')
+    : '<li><span>Sin eventos registrados</span><time>—</time></li>';
+})();
 </script>
-</body></html>
+</body>
+</html>
