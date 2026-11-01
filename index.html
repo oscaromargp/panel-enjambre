@@ -187,8 +187,16 @@ function enLinea(txt){
   return !!txt && txt.toLowerCase().indexOf('en linea') === 0;
 }
 
-const IA = { tokens:null, usd:null, mxn:null }; // leído de estado-enjambre.json si existe
+const IA = { tokens:null, usd:null, mxn:null }; // total del día (solo para la cabecera)
 const AGENTES = {};                             // agentes trabajando por equipo (si el JSON los trae)
+
+// est.equipos trae las cuatro máquinas con cpu/ram/disco/agentes/procesos/uso_ia.
+// El equipo se busca por su NOMBRE VISIBLE, no por la clave interna.
+const NOMBRE_EQUIPO = { f16:'F16', vivobook:'Vivobook', centenario:'Centenario', taller:'Taller' };
+function equipoDe(est, eq){
+  const eqs = est.equipos || {};
+  return eqs[NOMBRE_EQUIPO[eq.clave]] || null;
+}
 
 function tarjetaResumen(est, eq, viejo){
   const txt = estadoTexto(est, eq);
@@ -210,7 +218,8 @@ function tarjetaResumen(est, eq, viejo){
     return h + '</div>';
   }
 
-  const m = eq.metrica ? (est[eq.metrica] || {}) : {};
+  const propio = equipoDe(est, eq) || {};
+  const m = eq.metrica ? Object.assign({}, propio, est[eq.metrica] || {}) : propio;
   const dot = viejo ? 'warn' : '';
   let h = '<div class="card"><h3><span class="dot ' + dot + '"></span>' + eq.nombre +
           (viejo ? '<span class="viejo">DATO VIEJO</span>' : '') + '</h3>';
@@ -227,16 +236,22 @@ function tarjetaResumen(est, eq, viejo){
 
   // Qué está haciendo: agentes trabajando + consumo de IA del día
   h += '<div class="sep">Qué está haciendo</div>';
-  const ag = AGENTES[eq.clave];
-  h += fila('Agentes trabajando', esNumero(ag) ? esc(ag) : '<span style="color:#93a4bb">sin dato</span>');
-  if(esNumero(IA.tokens) || esNumero(IA.usd) || esNumero(IA.mxn)){
-    let ia = [];
-    if(esNumero(IA.tokens)) ia.push(esc(IA.tokens.toLocaleString('es-MX')) + ' tokens');
-    if(esNumero(IA.usd)) ia.push('US$' + esc(IA.usd.toFixed(2)));
-    if(esNumero(IA.mxn)) ia.push('$' + esc(IA.mxn.toFixed(2)) + ' MXN');
-    h += fila('IA del día', ia.join(' · '));
+  const ag = esNumero(m.agentes) ? m.agentes : AGENTES[eq.clave];
+  h += fila('Agentes trabajando', esNumero(ag) ? esc(ag) + (ag === 0 ? ' (libre)' : '') : '<span style="color:#93a4bb">sin dato</span>');
+  if(m.procesos){
+    h += fila('Procesos', '<span style="font-size:12px;color:#93a4bb">' + esc(m.procesos) + '</span>');
+  }
+  const u = m.uso_ia;
+  if(u && (esNumero(u.tokens_entrada) || esNumero(u.costo_usd))){
+    const tk = (Number(u.tokens_entrada) || 0) + (Number(u.tokens_salida) || 0);
+    let ia = [tk.toLocaleString('es-MX') + ' tokens'];
+    if(esNumero(u.costo_usd)) ia.push('US$' + Number(u.costo_usd).toFixed(4));
+    if(esNumero(u.costo_mxn)) ia.push('$' + Number(u.costo_mxn).toFixed(2) + ' MXN');
+    h += fila('IA hoy', ia.join(' · '));
+  } else if(eq.clave === 'servidor' || eq.clave === 'taller'){
+    h += fila('IA hoy', '<span style="color:#93a4bb">no usa agente</span>');
   } else {
-    h += fila('IA del día', '<span style="color:#93a4bb">sin dato</span>');
+    h += fila('IA hoy', '<span style="color:#93a4bb">sin dato</span>');
   }
   return h + '</div>';
 }
@@ -255,12 +270,13 @@ function tarjetaDetalle(est, eq, viejo){
     return h + '</div>';
   }
 
-  const m = eq.metrica ? (est[eq.metrica] || {}) : {};
+  const propio = equipoDe(est, eq) || {};
+  const m = eq.metrica ? Object.assign({}, propio, est[eq.metrica] || {}) : propio;
   let h = '<div class="card"><h3><span class="dot ' + (viejo ? 'warn' : '') + '"></span>' + eq.nombre +
           (viejo ? '<span class="viejo">DATO VIEJO</span>' : '') + '</h3>';
   h += fila('Estado', esc(txt));
-  if(eq.metrica){
-    h += fila('Modelo CPU', m.cpu_modelo ? esc(m.cpu_modelo) : 'sin dato');
+  if(m && (esNumero(m.cpu_uso) || esNumero(m.carga))){
+    if(m.cpu_modelo) h += fila('Modelo CPU', esc(m.cpu_modelo));
     h += fila('Carga', esNumero(m.carga) ? esc(m.carga) + ' / ' + esc(m.cpus || '?') + ' cpu' : 'sin dato');
     h += barra(esNumero(m.carga) ? (m.carga / (m.cpus || 1)) * 100 : null);
     h += fila('CPU', esNumero(m.cpu_uso) ? esc(m.cpu_uso) + '%' : 'sin dato');
@@ -276,16 +292,22 @@ function tarjetaDetalle(est, eq, viejo){
     h += fila('Métricas', 'este equipo no publica CPU/RAM/disco');
   }
   h += '<div class="sep">Qué está haciendo</div>';
-  const ag = AGENTES[eq.clave];
-  h += fila('Agentes trabajando', esNumero(ag) ? esc(ag) : '<span style="color:#93a4bb">sin dato</span>');
-  if(esNumero(IA.tokens) || esNumero(IA.usd) || esNumero(IA.mxn)){
-    let ia = [];
-    if(esNumero(IA.tokens)) ia.push(esc(IA.tokens.toLocaleString('es-MX')) + ' tokens');
-    if(esNumero(IA.usd)) ia.push('US$' + esc(IA.usd.toFixed(2)));
-    if(esNumero(IA.mxn)) ia.push('$' + esc(IA.mxn.toFixed(2)) + ' MXN');
-    h += fila('IA del día', ia.join(' · '));
+  const ag = esNumero(m.agentes) ? m.agentes : AGENTES[eq.clave];
+  h += fila('Agentes trabajando', esNumero(ag) ? esc(ag) + (ag === 0 ? ' (libre)' : '') : '<span style="color:#93a4bb">sin dato</span>');
+  if(m.procesos){
+    h += fila('Procesos', '<span style="font-size:12px;color:#93a4bb">' + esc(m.procesos) + '</span>');
+  }
+  const u = m.uso_ia;
+  if(u && (esNumero(u.tokens_entrada) || esNumero(u.costo_usd))){
+    const tk = (Number(u.tokens_entrada) || 0) + (Number(u.tokens_salida) || 0);
+    let ia = [tk.toLocaleString('es-MX') + ' tokens'];
+    if(esNumero(u.costo_usd)) ia.push('US$' + Number(u.costo_usd).toFixed(4));
+    if(esNumero(u.costo_mxn)) ia.push('$' + Number(u.costo_mxn).toFixed(2) + ' MXN');
+    h += fila('IA hoy', ia.join(' · '));
+  } else if(eq.clave === 'servidor' || eq.clave === 'taller'){
+    h += fila('IA hoy', '<span style="color:#93a4bb">no usa agente</span>');
   } else {
-    h += fila('IA del día', '<span style="color:#93a4bb">sin dato</span>');
+    h += fila('IA hoy', '<span style="color:#93a4bb">sin dato</span>');
   }
   return h + '</div>';
 }

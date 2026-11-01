@@ -1,40 +1,150 @@
 {
-  "actualizado": "2026-11-01T11:27:46Z",
-  "hora_local": "04:27:46",
-  "fecha_local": "01/11/2026",
-  "vps": {
-    "carga": 3.90, "cpus": 4,
-    "ram_pct": 27, "ram_total_gb": 15.6,
-    "disco_pct": 21, "disco_libre": "740G", "disco_total": "976G",
-    "cpu_modelo": "Intel Core Processor (Skylake, IBRS)", "cpu_uso": 29,
-    "temperatura": null, "gpu": "sin dato",
-    "uptime_horas": 314, "contenedores": 38
+ "actualizado": "2026-11-01T12:55:41Z",
+ "hora_local": "05:55:41",
+ "fecha_local": "01/11/2026",
+ "vps": {
+  "carga": 10.13,
+  "cpus": 4,
+  "ram_pct": 31,
+  "ram_total_gb": 15.6,
+  "disco_pct": 21,
+  "disco_libre": "741G",
+  "disco_total": "976G",
+  "cpu_modelo": "Intel Core Processor (Skylake, IBRS)",
+  "cpu_uso": 29,
+  "temperatura": null,
+  "gpu": "sin dato",
+  "uptime_horas": 315,
+  "contenedores": 38
+ },
+ "taller": {
+  "carga": 3.06,
+  "cpus": 4,
+  "ram_pct": 31,
+  "disco_pct": 10,
+  "disco_libre": "247G",
+  "disco_total": "287G",
+  "uptime_horas": 823,
+  "contenedores": 24
+ },
+ "enjambre": {
+  "servidor": "en linea",
+  "f16": "en linea",
+  "vivobook": "en linea",
+  "centenario": "en linea",
+  "taller": "en linea",
+  "xiaomi_14t": "desconectada",
+  "pixel_9a": "desconectada",
+  "celulares_ok": 0,
+  "celulares_total": 2,
+  "sitios_ok": 6,
+  "sitios_total": 6
+ },
+ "trabajos": {
+  "actual": "Sincronizando Escritorio a Drive",
+  "pendientes": 0,
+  "corriendo": 1,
+  "terminados": 2,
+  "ultimo": "5 cartas a centros de atencion"
+ },
+ "respaldo": {
+  "estado": "Al dia",
+  "cuando": "01/11 04:59",
+  "archivos_f16": 2502,
+  "sitios_cuando": "01/11 04:45"
+ },
+ "ia": {
+  "deepseek_usd": "4.11"
+ },
+ "enlaces": {
+  "archivos": "files.oscaromargp.xyz",
+  "tareas": "nexus.oscaromargp.xyz",
+  "musica": "musica.oscaromargp.xyz"
+ },
+ "equipos": {
+  "F16": {
+   "estado": "en_linea",
+   "carga": 27.0,
+   "cpus": 12,
+   "cpu_uso": 27,
+   "ram_pct": 85,
+   "ram_total_gb": 16,
+   "disco_pct": 84,
+   "disco_libre": "70GB",
+   "uptime_horas": 32,
+   "agentes": 5,
+   "procesos": "System; svchost; MsMpEng;",
+   "host": "laptop",
+   "uso_ia": {
+    "sesiones": 1,
+    "tokens_entrada": 67200,
+    "tokens_salida": 22900,
+    "costo_usd": 0.0,
+    "costo_mxn": 0.0
+   }
   },
-  "taller": {
-    "carga": 3.87, "cpus": 4,
-    "ram_pct": 31,
-    "disco_pct": 10, "disco_libre": "247G", "disco_total": "287G",
-    "uptime_horas": 822, "contenedores": 24
+  "Vivobook": {
+   "estado": "en_linea",
+   "carga": 0.8,
+   "cpus": 8,
+   "cpu_uso": 10,
+   "ram_pct": 36,
+   "ram_total_gb": 7,
+   "disco_pct": 51,
+   "disco_libre": "54G",
+   "uptime_horas": 18,
+   "agentes": 0,
+   "procesos": "7.2 chrome; 4.0 chrome; 3.5 chrome;",
+   "host": "go-vivo",
+   "uso_ia": {
+    "sesiones": 5,
+    "tokens_entrada": 858300,
+    "tokens_salida": 32100,
+    "costo_usd": 0.0,
+    "costo_mxn": 0.0
+   }
   },
-  "enjambre": {
-    "servidor": "en linea", "f16": "en linea", "vivobook": "encendida (el ssh no contesta)", "centenario": "en linea",
-    "taller": "en linea",
-    "xiaomi_14t": "desconectada", "pixel_9a": "desconectada",
-    "celulares_ok": 0, "celulares_total": 2,
-    "sitios_ok": 6, "sitios_total": 6
+  "Centenario": {
+   "estado": "en_linea",
+   "carga": 16.0,
+   "cpus": 8,
+   "cpu_uso": 16,
+   "ram_pct": 55,
+   "ram_total_gb": 15,
+   "disco_pct": 34,
+   "disco_libre": "314GB",
+   "uptime_horas": 18,
+   "agentes": 1,
+   "procesos": "System; MsMpEng; svchost;",
+   "host": "cente",
+   "uso_ia": {
+    "sesiones": 5,
+    "tokens_entrada": 286400,
+    "tokens_salida": 82100,
+    "costo_usd": 0.0,
+    "costo_mxn": 0.0
+   }
   },
-  "trabajos": {
-    "actual": "Sincronizando Escritorio a Drive", "pendientes": 0, "corriendo": 1,
-    "terminados": 2, "ultimo": "5 cartas a centros de atencion"
-  },
-  "respaldo": {
-    "estado": "Al dia", "cuando": "01/11 04:59",
-    "archivos_f16": 2502, "sitios_cuando": "01/11 04:45"
-  },
-  "ia": { "deepseek_usd": "4.57" },
-  "enlaces": {
-    "archivos": "files.oscaromargp.xyz",
-    "tareas": "nexus.oscaromargp.xyz",
-    "musica": "musica.oscaromargp.xyz"
+  "Taller": {
+   "estado": "en_linea",
+   "carga": 2.39,
+   "cpus": 4,
+   "cpu_uso": 59,
+   "ram_pct": 31,
+   "ram_total_gb": 16,
+   "disco_pct": 9,
+   "disco_libre": "247G",
+   "uptime_horas": 823,
+   "agentes": 4,
+   "procesos": "783 runc; 100 runc:[2:INIT]; 12.5 bash;",
+   "host": "taller"
   }
+ },
+ "tipo_cambio": 18.82,
+ "ia_hoy": {
+  "costo_usd": 0.0,
+  "costo_mxn": 0.0,
+  "tokens": 1349000
+ },
+ "equipos_actualizado": "2026-11-01T12:56:03Z"
 }

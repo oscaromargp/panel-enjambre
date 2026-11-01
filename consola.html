@@ -132,6 +132,32 @@ async function trae(archivo){
   return r.json();
 }
 
+function tarjetaEquipo(nombre, d){
+  if(!d || d.estado !== 'en_linea'){
+    return '<div class="card down"><h3><span class="dot off"></span>' + nombre + '</h3>' +
+           fila('Estado', 'SIN CONEXIÓN') + '</div>';
+  }
+  const ag = (d.agentes !== undefined) ? d.agentes : 'sin dato';
+  const agTxt = ag === 0 ? 'ninguno' : (ag + ' trabajando');
+  let h = '<div class="card"><h3><span class="dot' + (ag > 0 ? ' warn' : '') + '"></span>' + nombre + '</h3>';
+  h += fila('CPU', (d.cpu_uso !== undefined ? d.cpu_uso + '%' : 'sin dato'));
+  h += barra(d.cpu_uso);
+  h += fila('RAM', (d.ram_pct !== undefined ? d.ram_pct + '%' : 'sin dato'));
+  h += barra(d.ram_pct);
+  h += fila('Disco', (d.disco_pct !== undefined ? d.disco_pct + '%' : 'sin dato'));
+  h += barra(d.disco_pct);
+  if(d.uptime_horas !== undefined) h += fila('Encendido', d.uptime_horas + ' h');
+  h += fila('Agentes', agTxt);
+  if(d.uso_ia){
+    const u = d.uso_ia;
+    const tok = (u.tokens_entrada||0) + (u.tokens_salida||0);
+    h += fila('IA hoy', tok.toLocaleString('es-MX') + ' tok');
+    h += fila('Gasto hoy', '$' + (u.costo_usd||0).toFixed(4) + ' ≈ $' + (u.costo_mxn||0).toFixed(2) + ' MXN');
+  }
+  h += '</div>';
+  return h;
+}
+
 (async function(){
   let est = null, evs = [];
   try { est = await trae('estado-enjambre.json'); } catch(e){ /* queda null */ }
@@ -166,6 +192,12 @@ async function trae(archivo){
   if(tra.corriendo !== undefined) frase += ' · <b>' + tra.corriendo + '</b> trabajo(s) corriendo';
   if(tra.pendientes !== undefined) frase += ' · <b>' + tra.pendientes + '</b> pendiente(s)';
   if(tra.actual) frase += '<br>Ahora mismo: ' + tra.actual;
+  const iah = est.ia_hoy || (est.ia || {});
+  if(iah.costo_usd !== undefined && est.ia_hoy){
+    frase += '<br>IA hoy: <b>' + (iah.tokens||0).toLocaleString('es-MX') + '</b> tokens · $' +
+             (iah.costo_usd||0).toFixed(4) + ' USD ≈ <b>$' + (iah.costo_mxn||0).toFixed(2) + ' MXN</b>' +
+             (est.tipo_cambio ? ' (TC ' + est.tipo_cambio + ')' : '');
+  }
   const resp = est.respaldo || {};
   if(resp.estado) frase += '<br>Respaldo: ' + resp.estado + (resp.cuando ? ' (' + resp.cuando + ')' : '');
   document.getElementById('resumen').innerHTML = frase;
@@ -177,8 +209,12 @@ async function trae(archivo){
   }
 
   // tarjetas con métricas
-  document.getElementById('equipos').innerHTML =
-    tarjeta('Servidor (VPS)', est.vps) + tarjeta('Taller', est.taller);
+  let tarjetas = '';
+  const eq = est.equipos || {};
+  const orden = ['F16','Asus Go','Cente','Taller'];
+  orden.forEach(function(n){ tarjetas += tarjetaEquipo(n, eq[n]); });
+  tarjetas += tarjeta('Servidor (VPS)', est.vps);
+  document.getElementById('equipos').innerHTML = tarjetas;
 
   // miembros del enjambre
   const chips = nombres.map(function(n){
