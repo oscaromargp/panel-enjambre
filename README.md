@@ -51,3 +51,14 @@ bonito: es la única forma que tiene de saber si el enjambre está trabajando o 
   cero.
 - Un dato con más de 15 minutos de antigüedad se marca como viejo en pantalla.
 - Los cambios se prueban contra los JSON reales del VPS antes de publicar.
+
+## Qué se corrigió y desplegó (1-nov-2026)
+
+- **Datos viejos:** `estado-enjambre.sh` escribía en la raíz del sitio y el panel lee
+  `/panel/estado-enjambre.json`. Corregida la ruta; verificado por HTTP que el estado se refresca.
+- **Portada nueva:** pestañas Resumen / Equipos / Pendientes / Accesos, métricas por equipo y
+  etiquetas SIN CONEXIÓN / DATO VIEJO. Desplegada con respaldo `index.html.bak-20261101-1129`.
+- **Consola nueva:** rejilla de tarjetas, tipografía 16px, resumen en palabras, fallas visibles
+  (ej. "encendida pero el ssh no contesta"), últimos 15 eventos. Respaldo `consola.html.bak-20261101-1129`.
+- **Pendiente de decisión:** `progreso.json` y `trabajos.json` no tienen generador activo desde el
+  25-oct; `estado-bitacora.json` no tiene escritor. Mientras no se reconecten, se muestran como dato viejo.

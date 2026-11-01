@@ -1,23 +1,23 @@
 {
-  "actualizado": "2026-11-01T11:01:00Z",
-  "hora_local": "04:01:00",
+  "actualizado": "2026-11-01T11:27:46Z",
+  "hora_local": "04:27:46",
   "fecha_local": "01/11/2026",
   "vps": {
-    "carga": 5.51, "cpus": 4,
-    "ram_pct": 28, "ram_total_gb": 15.6,
+    "carga": 3.90, "cpus": 4,
+    "ram_pct": 27, "ram_total_gb": 15.6,
     "disco_pct": 21, "disco_libre": "740G", "disco_total": "976G",
-    "cpu_modelo": "Intel Core Processor (Skylake, IBRS)", "cpu_uso": 78,
+    "cpu_modelo": "Intel Core Processor (Skylake, IBRS)", "cpu_uso": 29,
     "temperatura": null, "gpu": "sin dato",
-    "uptime_horas": 313, "contenedores": 38
+    "uptime_horas": 314, "contenedores": 38
   },
   "taller": {
-    "carga": 2.22, "cpus": 4,
+    "carga": 3.87, "cpus": 4,
     "ram_pct": 31,
     "disco_pct": 10, "disco_libre": "247G", "disco_total": "287G",
     "uptime_horas": 822, "contenedores": 24
   },
   "enjambre": {
-    "servidor": "en linea", "f16": "en linea", "vivobook": "en linea", "centenario": "en linea",
+    "servidor": "en linea", "f16": "en linea", "vivobook": "encendida (el ssh no contesta)", "centenario": "en linea",
     "taller": "en linea",
     "xiaomi_14t": "desconectada", "pixel_9a": "desconectada",
     "celulares_ok": 0, "celulares_total": 2,
@@ -31,7 +31,7 @@
     "estado": "Al dia", "cuando": "01/11 04:59",
     "archivos_f16": 2502, "sitios_cuando": "01/11 04:45"
   },
-  "ia": { "deepseek_usd": "4.64" },
+  "ia": { "deepseek_usd": "4.57" },
   "enlaces": {
     "archivos": "files.oscaromargp.xyz",
     "tareas": "nexus.oscaromargp.xyz",
