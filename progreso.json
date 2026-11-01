@@ -1,0 +1,110 @@
+{
+ "trabajos": {
+  "F16": {
+   "titulo": "Panel: captura de pantalla",
+   "pasos": [],
+   "paso": 0,
+   "estado": "listo",
+   "inicio": "05:03:21",
+   "log": [
+    {
+     "h": "05:03:21",
+     "t": "empieza: Panel: captura de pantalla"
+    },
+    {
+     "h": "05:04:17",
+     "t": "captura lista"
+    }
+   ],
+   "pedido_por": "Oscar",
+   "visto": "10/10/2026 05:04:17",
+   "descripcion": ""
+  },
+  "VPS": {
+   "titulo": "Ficha 360 de la casa de Puerto Escondido",
+   "pasos": [
+    "Juntar el material",
+    "Revisar fotos",
+    "Armar la ficha",
+    "Publicar"
+   ],
+   "paso": 4,
+   "estado": "listo",
+   "inicio": "20:53:14",
+   "log": [
+    {
+     "h": "20:53:14",
+     "t": "empieza: Ficha 360 de la casa de Puerto Escondido"
+    },
+    {
+     "h": "21:06:41",
+     "t": "material del KM7 revisado (43 fotos) y descrito para la ficha"
+    },
+    {
+     "h": "21:06:41",
+     "t": "FICHA 360 del KM7 publicada + PDF"
+    },
+    {
+     "h": "21:14:53",
+     "t": "Lote 8 actualizado con imagen satelital (pagina + PDF)"
+    },
+    {
+     "h": "21:14:53",
+     "t": "entregado por correo a Oscar"
+    },
+    {
+     "h": "21:14:53",
+     "t": "terminado"
+    }
+   ],
+   "pedido_por": "Oscar",
+   "descripcion": "Ficha del inmueble de Malucano (donde vive Ana Karen): datos, servicios, fotos y enlaces. FALTA el material fotografico de esa casa.",
+   "visto": "26/09/2026 21:14:53"
+  },
+  "PIXEL": {
+   "titulo": "Consultar batería Pixel 9a",
+   "pasos": [],
+   "paso": 0,
+   "estado": "listo",
+   "inicio": "00:05:52",
+   "log": [
+    {
+     "h": "00:05:52",
+     "t": "empieza: Consultar batería Pixel 9a"
+    },
+    {
+     "h": "00:06:18",
+     "t": "batería consultada"
+    }
+   ],
+   "pedido_por": "Oscar",
+   "descripcion": "",
+   "visto": "05/10/2026 00:06:18"
+  },
+  "GO": {
+   "titulo": "Hermes: mkdir -p ~/trabajos/oscaromargp && cd ~/trabajos/oscaromargp && curl -sL -m 30 -o logo.svg",
+   "pasos": [
+    "conectando",
+    "ejecutando",
+    "terminando"
+   ],
+   "paso": 3,
+   "estado": "listo",
+   "inicio": "08:41:54",
+   "log": [
+    {
+     "h": "08:41:54",
+     "t": "empieza: Hermes: mkdir -p ~/trabajos/oscaromargp && cd ~/trabajos/oscaromargp && curl -sL -m 30 -o logo.svg"
+    },
+    {
+     "h": "08:41:59",
+     "t": "terminado. GO libre otra vez - se puede apagar si no la usas."
+    }
+   ],
+   "pedido_por": "Oscar",
+   "descripcion": "Hermes, desde el servidor",
+   "visto": "25/10/2026 08:41:59"
+  }
+ },
+ "actualizado": "25/10/2026 08:41:59"
+}

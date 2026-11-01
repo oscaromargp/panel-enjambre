@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Estado de todo · Óscar</title>
+<!-- ============================================================
+     PÁGINA DE ESTADO — una sola casa para todo lo que está en curso
+     ============================================================
+     POR QUÉ EXISTE (27-sep-2026): Óscar reclamó con razón que las cosas
+     "se hicieron pero no me enteré". Este es el arreglo de raíz: UNA
+     página con todo lo vivo, qué falta, y —en grande— lo que espera
+     una decisión SUYA.
+
+     REGLA: si algo espera su decisión, va arriba y marcado. No se
+     esconde entre lo demás.
+     ============================================================ -->
+<style>
+  :root{--fondo:#0a0f16;--panel:#111b26;--panel2:#16232f;--linea:#22323f;
+        --tinta:#e9eff9;--tenue:#8598ae;--azul:#5aa9ff;--verde:#39d98a;
+        --ambar:#ffc857;--rojo:#ff6b6b;--morado:#b28dff}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:var(--fondo);color:var(--tinta);
+    font:15.5px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .env{max-width:1000px;margin:0 auto;padding:30px 20px 70px}
+
+  header{border-bottom:2px solid var(--linea);padding-bottom:16px;margin-bottom:22px}
+  h1{margin:0;font-size:24px;letter-spacing:.3px}
+  h1 small{display:block;font-size:12.5px;color:var(--tenue);font-weight:400;
+    letter-spacing:1.5px;margin-top:6px;text-transform:uppercase}
+  .hora{font-size:13px;color:var(--tenue);margin-top:10px}
+
+  /* ---- lo que espera TU decisión: arriba y grande ---- */
+  .urgente{background:linear-gradient(135deg,rgba(255,200,87,.13),rgba(255,200,87,.05));
+    border:1.5px solid rgba(255,200,87,.55);border-radius:13px;padding:20px 22px;
+    margin-bottom:28px}
+  .urgente h2{margin:0 0 4px;font-size:17px;color:var(--ambar)}
+  .urgente .sub{margin:0 0 16px;font-size:13px;color:#c9b489}
+  .urgente ul{margin:0;padding:0;list-style:none}
+  .urgente li{display:grid;grid-template-columns:26px 1fr;gap:11px;
+    padding:10px 0;border-bottom:1px solid rgba(255,200,87,.16);font-size:15px}
+  .urgente li:last-child{border-bottom:0}
+  .urgente li .n{color:var(--ambar);font-weight:800}
+  .urgente li b{color:#fff}
+  .urgente li .que{display:block;font-size:13.5px;color:#c9b489;margin-top:2px}
+
+  .bloque{background:var(--panel);border:1px solid var(--linea);border-radius:12px;
+    padding:18px 20px;margin-bottom:16px}
+  .bloque h3{margin:0 0 3px;font-size:16px;color:var(--azul);display:flex;
+    align-items:center;gap:9px;flex-wrap:wrap}
+  .bloque .porque{margin:0 0 14px;font-size:13px;color:var(--tenue);line-height:1.6}
+
+  .fila{display:grid;grid-template-columns:150px 1fr;gap:13px;padding:9px 0;
+    border-bottom:1px solid var(--linea);font-size:14.5px;align-items:start}
+  .fila:last-child{border-bottom:0}
+  .fila .et{font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;
+    color:var(--tenue);padding-top:4px}
+  .fila .va{color:#dbe6f5}
+  .fila .va b{color:#fff}
+  .fila .va .nota{display:block;font-size:13px;color:var(--tenue);margin-top:3px}
+
+  .chip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.5px;
+    padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .c-hecho{background:rgba(57,217,138,.18);color:#a8ecc9;border:1px solid rgba(57,217,138,.45)}
+  .c-falta{background:rgba(255,107,107,.16);color:#ffbcbc;border:1px solid rgba(255,107,107,.45)}
+  .c-espera{background:rgba(255,200,87,.18);color:#ffe0a3;border:1px solid rgba(255,200,87,.5)}
+  .c-curso{background:rgba(90,169,255,.18);color:#bfdcff;border:1px solid rgba(90,169,255,.5)}
+
+  .enlace{color:var(--azul);text-decoration:none;word-break:break-all}
+  .enlace:hover{text-decoration:underline}
+
+  .piedepagina{margin-top:26px;border-top:1px solid var(--linea);padding-top:14px;
+    font-size:12.5px;color:var(--tenue);line-height:1.8}
+</style>
+</head>
+<body>
+<div class="env">
+
+  <header>
+    <h1>Estado de todo
+      <small>Óscar Omar Gómez Peña · una sola casa para lo que está en curso</small>
+    </h1>
+    <div class="hora" id="hora">—</div>
+  </header>
+
+  <!-- ═══════ LO QUE ESPERA TU DECISIÓN ═══════ -->
+  <div class="urgente">
+    <h2>⚠️ Esto está detenido esperando TU decisión</h2>
+    <p class="sub">No puedo avanzar sin que me digas. Y aquí lo tienes junto, para que no se pierda.</p>
+    <ul>
+      <li><span class="n">1</span><span><b>Regalos del cumpleaños de Carlos (3 de noviembre)</b>
+        La investigación ya está hecha y te llegó por correo el 25-sep. Falta que <b>elijas el combo</b> y me confirmes la dirección correcta, que es <b>Hueyapan, Veracruz</b> (no Puerto Escondido).
+        <span class="que">Si me dices "el combo tal", lo pido hoy.</span></span></li>
+      <li><span class="n">2</span><span><b>El nombre definitivo de la cafetería</b>
+        Tú dijiste <b>BN Coffee</b>. El logo dice "BueN CAFÉ" y el dominio apartado es "bncoffe.com". Necesito que los tres digan lo mismo antes de producir vasos, empaques y uniformes.
+        <span class="que">Confírmame cómo se escribe exactamente y arranco los mockups.</span></span></li>
+      <li><span class="n">3</span><span><b>El vuelo a Puerto Escondido (17 a 21 de octubre)</b>
+        Encontré $5,638 en Aeroméxico. No lo he comprado porque mover dinero es decisión tuya.
+        <span class="que">Dime si lo compro yo por tu cuenta de Viva o lo compras tú.</span></span></li>
+      <li><span class="n">4</span><span><b>El cuestionario de 26 preguntas</b>
+        Lo llenaste a medias. Con tus respuestas armo el plan de trabajo definitivo.
+        <span class="que"><a class="enlace" href="https://pardesantos.com.mx/cuestionario.html">Contestar el cuestionario →</a></span></span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════ POR TEMA ═══════ -->
+
+  <div class="bloque">
+    <h3>Paquete DHL <span class="chip c-curso">en tránsito</span></h3>
+    <p class="porque">Guía 3324291876 · Los Mochis → La Paz · 1 kg · muestras comerciales</p>
+    <div class="fila"><span class="et">Existe</span><span class="va">Un vigía automático que consulta la API oficial de DHL cada 3 horas. Corrió bien hoy a las 00:48.
+      <span class="nota">El problema: solo avisaba si el estado CAMBIABA, por eso llevas días sin saber nada.</span></span></div>
+    <div class="fila"><span class="et">Falta</span><span class="va">Que te reporte el estado <b>una vez al día aunque no cambie</b>, para que sepas que sigue vivo. Lo hago hoy.</span></div>
+    <div class="fila"><span class="et">Rastrear</span><span class="va"><a class="enlace" href="https://www.dhl.com/mx-es/home/rastreo.html?tracking-id=3324291876" target="_blank">dhl.com · guía 3324291876</a></span></div>
+  </div>
+
+  <div class="bloque">
+    <h3>Baños modulares — cotizaciones <span class="chip c-espera">falta entregarte la lista</span></h3>
+    <p class="porque">Smart Bathroom, VRN Home, Sonora y otros. Entrega en la casa del Centenario.</p>
+    <div class="fila"><span class="et">Hecho</span><span class="va">La investigación de <b>10+ empresas mexicanas con precios</b> (31 de agosto) y la <b>solicitud de cotización</b> por tu orden del 25 de septiembre: por correo y por WhatsApp.</span></div>
+    <div class="fila"><span class="et">Lo que faltaba</span><span class="va">Nunca te entregué la <b>lista con nombre, teléfono y a quién se le escribió</b>. Sin eso no puedes llamar. <b>Lo hago hoy.</b></span></div>
+    <div class="fila"><span class="et">Después</span><span class="va">Si no contestan, te lo digo y te propongo llamarlos yo.</span></div>
+  </div>
+
+  <div class="bloque">
+    <h3>Vuelo La Paz → Puerto Escondido <span class="chip c-espera">espera tu decisión</span></h3>
+    <p class="porque">Audiencia del 19 de octubre · cita con la Lic. Clío el 20.</p>
+    <div class="fila"><span class="et">Hecho</span><span class="va">El estudio de fechas y precios. La mejor: <b>sábado 17 a miércoles 21, $5,638 en Aeroméxico con 1 escala</b>. Comparadas también 24→28 y 18→21.</span></div>
+    <div class="fila"><span class="et">Falta</span><span class="va">La <b>alerta de cuándo comprar</b> y la búsqueda de <b>cupones y descuentos</b>. Lo que me pediste y no hice.</span></div>
+    <div class="fila"><span class="et">Dato</span><span class="va">Tienes cuenta en <b>Viva Aerobus</b> guardada. Conviene comparar antes de comprar.</span></div>
+  </div>
+
+  <div class="bloque">
+    <h3>Caso Carlos · expediente y centros <span class="chip c-hecho">investigación lista</span></h3>
+    <p class="porque">Audiencia del 19-oct · cambio de residencia y guarda y custodia.</p>
+    <div class="fila"><span class="et">Hecho</span><span class="va"><b>19 centros en La Paz y 24 en Veracruz</b>, cada dato con su fuente · <b>fichas imprimibles</b> (10 páginas, una por centro con mapa y teléfonos) · <b>9 cartas personalizadas</b> · <b>5 cartas ya enviadas</b> desde tu Gmail.</span></div>
+    <div class="fila"><span class="et">Dónde</span><span class="va">Tu Drive: <b>EXPEDIENTE-CARLOS</b> con 5 carpetas (investigación, cartas enviadas, respuestas, para la audiencia, libro).</span></div>
+    <div class="fila"><span class="et">Falta</span><span class="va">Una <b>hoja índice</b> que te diga "esto está aquí, ábrelo así", con los montos <b>en pesos y su tipo de cambio</b>. Y las cartas a los centros que solo tienen formulario web.</span></div>
+  </div>
+
+  <div class="bloque">
+    <h3>Cumpleaños de Carlos · servicios a domicilio <span class="chip c-espera">falta la investigación</span></h3>
+    <p class="porque">3 de noviembre · Carlos está en Hueyapan, Veracruz.</p>
+    <div class="fila"><span class="et">Hecho</span><span class="va">La investigación del regalo (producto del reel identificado), enviada por correo el 25-sep.</span></div>
+    <div class="fila"><span class="et">Falta</span><span class="va">La investigación de <b>servicios a domicilio cerca de Hueyapan</b>: pastelería, flores, pizza, comida. Cosas que puedas mandarle cualquier día sin avisar. <b>Lo hago hoy.</b></span></div>
+    <div class="fila"><span class="et">Y</span><span class="va">La <b>alerta del cumpleaños</b> con antelación suficiente.</span></div>
+  </div>
+
+  <div class="bloque">
+    <h3>BN Coffee · la cafetería <span class="chip c-curso">en construcción</span></h3>
+    <p class="porque">Cliente: Carlos Moreno Lacalle · plaza en San Pedro Garza García.</p>
+    <div class="fila"><span class="et">Hecho</span><span class="va"><b>ADN de marca</b> · <b>plan del proyecto</b> (5 fases) · <b>guion del audio</b> para que lo grabes · <b>avance de propuestas</b> (marca, identidad, aplicaciones, menú, digital) · el <b>logo completo</b> (.ai, SVG, PDF, PNG en 3 tamaños, webp y la tipografía).</span></div>
+    <div class="fila"><span class="et">Dónde</span><span class="va">Tu Drive, carpeta <b>barbanegra-coffee</b>.</span></div>
+    <div class="fila"><span class="et">Falta</span><span class="va"><b>Renders, mockups</b> de las aplicaciones (vasos, empaques, uniformes), la <b>landing</b> y la <b>revista</b>. Bloqueado hasta que me confirmes el nombre exacto.</span></div>
+    <div class="fila"><span class="et">Dominio</span><span class="va">Orden <b>20003</b> en SuEspacio por <b>bncoffe.com</b> · <b>$260.00 MXN</b> (IVA incluido, cantidad neta) · vence el <b>6 de octubre</b>. Ya les escribí pidiendo los datos para transferencia.</span></div>
+  </div>
+
+  <div class="bloque">
+    <h3>El CRM · 18 leads sin contestar <span class="chip c-espera">falta el video</span></h3>
+    <p class="porque">Kommo Stellar · 32 conversaciones en la bandeja.</p>
+    <div class="fila"><span class="et">Hecho</span><span class="va">Leí <b>18 leads con nombre, fecha y mensaje</b>. <b>13 escribieron lo mismo</b>: "vi el anuncio del NOMAD, quiero cotizar" → el anuncio funciona, falta contestar. Con <b>3 textos de respuesta</b> y el guion de llamada.</span></div>
+    <div class="fila"><span class="et">Dónde</span><span class="va"><a class="enlace" href="https://pardesantos.com.mx/crm-stellar/lista.html">Lista completa con cada uno</a></span></div>
+    <div class="fila"><span class="et">Falta</span><span class="va">Los <b>teléfonos</b> (están dentro de cada ficha) y el <b>video de Mario Alberto</b>, que lo pidió hace días.</span></div>
+  </div>
+
+  <div class="bloque">
+    <h3>Enjambre · equipos y paneles <span class="chip c-curso">en arreglo</span></h3>
+    <p class="porque">Servidor, F16, GO, CENTE, Pixel, Xiaomi.</p>
+    <div class="fila"><span class="et">Hecho</span><span class="va"><b>Bitácora en vivo</b> funcionando (errores en rojo, log diario guardado) · consola con datos reales · respaldo de la F16 (2,502 archivos).</span></div>
+    <div class="fila"><span class="et">Falta</span><span class="va">La <b>Pantalla 2</b> (estado y cola) · <b>control remoto de un clic</b> · pantallas, cámara y micrófono · batería y conexión de cada equipo · <b>quitar las secciones que no hacen nada</b> · estandarizar las órdenes · el pantallazo azul de la F16.</span></div>
+  </div>
+
+  <div class="piedepagina">
+    Esta página es el arreglo de raíz al problema que me señalaste: las cosas se hacían
+    y tú no te enterabas. Aquí está TODO, en un solo lugar, con lo que espera tu decisión arriba.<br><br>
+    Hermes · 27-sep-2026
+  </div>
+</div>
+
+<script>
+function reloj(){
+  const d=new Date();
+  document.getElementById('hora').textContent =
+    'Actualizado: ' + d.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'}) +
+    ' · ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+reloj();
+</script>
+</body>
+</html>

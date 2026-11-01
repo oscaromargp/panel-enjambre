@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#08090b">
+<title>Enjambre · centro de control</title>
+<style>
+ :root{--gold:#c9a24b;--gold2:#e8d9a8;--ok:#4ec98a;--warn:#e0a33c;--bad:#e0625a;--txt:#e9e6df;--dim:#98938a;--line:#252932;--card:#0e1218;--card2:#0d1016;--negro:#08090b}
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:var(--negro);color:var(--txt);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45;font-size:13.5px;padding:10px 10px 40px}
+ .wrap{max-width:980px;margin:0 auto}
+ .sprite{display:none}
+ .ic{width:16px;height:16px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+ .ic.fill{fill:currentColor;stroke:none}
+ header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+ .kick{letter-spacing:.24em;font-size:9px;color:var(--gold);text-transform:uppercase}
+ h1{font-size:17px;font-weight:600;margin-top:2px}
+ .live{font-size:10.5px;color:var(--dim);text-align:right;line-height:1.35}
+ .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-right:4px;animation:p 2s infinite}
+ @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+ .tira{display:flex;gap:6px;flex-wrap:wrap;padding:6px 0 9px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+ .tira a{flex:0 0 auto;font-size:10.5px;color:var(--dim);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:4px 10px;white-space:nowrap}
+ .tira a:hover{color:var(--gold);border-color:var(--gold)}
+ h2{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:16px 0 7px;scroll-margin-top:10px;display:flex;align-items:center;gap:6px}
+ h2 svg{color:var(--gold)}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px}
+ /* candado */
+ .lock.on{border-color:#3d6b52;background:linear-gradient(180deg,#0f1d16,#0e1218)}
+ .lock.pausa{border-color:#8a7130;background:linear-gradient(180deg,#1d1a10,#0e1218)}
+ .lock .t{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:5px}
+ .lock .big{font-size:15.5px;font-weight:600;color:#fff;line-height:1.3}
+ .lock .sub{font-size:11.5px;color:var(--gold2);margin-top:4px}
+ .lock .latido{font-size:10.5px;color:var(--dim);margin-top:7px;border-top:1px solid var(--line);padding-top:5px}
+ /* tira de vigilancia */
+ .vig{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+ .vig span{display:flex;align-items:center;gap:5px;font-size:10.5px;border:1px solid var(--line);border-radius:20px;padding:4px 9px;color:var(--dim);background:var(--card2)}
+ .vig span.on{color:var(--gold2);border-color:#5a4a1e}
+ .vig span.si{color:var(--bad);border-color:#5c2f2f}
+ .vig span .ic{width:13px;height:13px}
+ /* botones */
+ .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:6px}
+ button{background:#12161d;color:var(--txt);border:1px solid #2a3140;border-radius:9px;padding:9px 9px;font-size:12px;font-family:inherit;cursor:pointer;text-align:left;transition:.12s;line-height:1.25}
+ button:hover{border-color:var(--gold);color:#fff}
+ button b{display:block;font-size:12.5px;color:#fff;font-weight:600}
+ button small{color:var(--dim);font-size:10px}
+ button.peligro:hover{border-color:var(--bad)}
+ button[disabled]{cursor:not-allowed}
+ .btns.mini{grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}
+ .btns.mini button{padding:6px 7px;font-size:11px;text-align:center}
+ .btns.mini button b{font-size:11.5px}
+ .msg{margin-top:8px;font-size:11.5px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0f1319;display:none}
+ /* ---------- PERFILES DE EQUIPO ---------- */
+ .perfil{border:1px solid var(--line);background:var(--card);border-radius:13px;padding:12px;margin-bottom:10px;overflow:hidden}
+ .perfil.down{background:var(--card2)}
+ .perfil.bueno{border-left:3px solid #2f5c46}
+ .perfil.atencion{border-left:3px solid var(--warn)}
+ .perfil.critico{border-left:3px solid var(--bad)}
+ .perfil.apagado{border-left:3px solid #3a3d45;opacity:.72}
+ .ptop{display:flex;gap:11px;align-items:flex-start}
+ .avatar{width:56px;height:56px;border-radius:15px;border:1px solid var(--line);background:radial-gradient(circle at 32% 22%,#1b2129,#0a0d11);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+ .avatar svg{width:38px;height:38px;stroke:var(--gold2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+ .perfil.down .avatar svg{stroke:var(--dim)}
+ .pinfo{flex:1;min-width:0}
+ .pnombre{font-size:15px;font-weight:600;color:#fff;line-height:1.2}
+ .ptipo{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;display:block;margin-top:2px}
+ .prol{font-size:11px;color:var(--dim);margin-top:1px}
+ .pchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+ .chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+ .chip .ic{width:12px;height:12px}
+ .chip.vivo{color:var(--ok);border-color:#2f5c46}
+ .chip.muerto{color:var(--bad);border-color:#5c2f2f}
+ .chip.bueno{color:var(--ok);border-color:#2f5c46}
+ .chip.atencion{color:var(--warn);border-color:#5a4a1e}
+ .chip.critico{color:var(--bad);border-color:#5c2f2f}
+ .chip.apagado{color:var(--dim)}
+ .motivos{font-size:10.5px;color:var(--gold2);margin-top:6px;padding-left:2px}
+ .motivos i{color:var(--warn);font-style:normal}
+ .metricas{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:6px;margin-top:10px}
+ .mi{background:#0a0d12;border:1px solid #1a1e26;border-radius:9px;padding:7px 8px;min-width:0}
+ .mi.ancho{grid-column:1/-1}
+ .mil{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+ .mil .ic{width:12.5px;height:12.5px;color:var(--gold)}
+ .miv{font-size:13px;font-weight:600;color:#fff;margin-top:3px;word-break:break-word}
+ .miv.sd{color:#6d6862;font-weight:400;font-style:italic;font-size:12px}
+ .minota{font-size:10px;color:var(--dim);margin-top:2px;word-break:break-word}
+ .bar{height:3px;background:#1a1e26;border-radius:3px;margin-top:5px;overflow:hidden}
+ .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad))}
+ .act{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
+ .act span{font-size:10px;padding:2px 7px;border-radius:20px;background:#131a24;border:1px solid #24303f;color:#bcd0e6}
+ .perfil .nota{font-size:10.5px;color:var(--gold2);margin-top:8px;background:#12100a;border:1px solid #3a3018;border-radius:8px;padding:7px 9px;word-break:break-word}
+ .cmdtit{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:11px 0 6px;border-top:1px solid #171b22;padding-top:8px;display:flex;align-items:center;gap:5px}
+ .cmds{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:6px}
+ .cmds button{display:block}
+ .cmds .ic{color:var(--gold);width:17px;height:17px;margin-bottom:3px}
+ .cmds button b{font-size:12px}
+ .cmds button small{display:block;font-size:9.5px;line-height:1.3;margin-top:1px}
+ .cmds button.off{background:#0b0e13;border-color:#1c1f26;color:#6d6862;cursor:not-allowed}
+ .cmds button.off .ic{color:#5a564f}
+ .cmds button.off b{color:#8a857d;font-weight:500}
+ .cmds button.off small{color:#7a6a52}
+ .ult{border-top:1px solid #171b22;margin-top:9px;padding-top:7px;font-size:10.5px;color:var(--dim);word-break:break-word}
+ .ult b{color:var(--gold2);font-weight:600}
+ /* vistas */
+ .vistas{display:grid;grid-template-columns:1fr;gap:9px}
+ @media(min-width:760px){.vistas.dos{grid-template-columns:1fr 1fr}}
+ .vista img{width:100%;border-radius:8px;border:1px solid var(--line);background:#000;display:block}
+ .vista .pie{font-size:10.5px;color:var(--dim);margin-bottom:4px;display:flex;justify-content:space-between;gap:6px}
+ audio{width:100%;margin-top:5px;height:32px}
+ /* registro */
+ .fila{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #171b22;font-size:11.5px}
+ .fila:last-child{border:0}
+ .fila span:last-child{color:var(--dim);white-space:nowrap}
+ .cr{font-size:11.5px;color:var(--dim)}
+ .caja{margin-top:8px;display:flex;gap:6px}
+ input{flex:1;background:#0a0d12;border:1px solid #2a3140;border-radius:8px;color:#fff;padding:9px;font-family:inherit;font-size:12.5px}
+ footer{margin-top:20px;text-align:center;color:#5f5b54;font-size:10px;line-height:1.6}
+ /* ================= JERARQUIA: leer el estado en 2 segundos =================
+    Regla del rediseño: arriba SOLO lo que pide atención; el detalle se despliega.
+    Todo lo que nunca cambia o siempre sale vacío baja a una línea muda. */
+ .general{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-left:4px solid var(--dim);
+   background:var(--card);border-radius:12px;padding:11px 14px;margin:0 0 9px}
+ .general.critico{border-left-color:var(--bad);background:linear-gradient(90deg,#1c0f0e,var(--card) 62%)}
+ .general.atencion{border-left-color:var(--warn);background:linear-gradient(90deg,#1a150b,var(--card) 62%)}
+ .general.bien{border-left-color:var(--ok)}
+ .general .gv{font-size:20px;font-weight:700;line-height:1.12;letter-spacing:-.01em}
+ .general.critico .gv{color:var(--bad)}
+ .general.atencion .gv{color:var(--warn)}
+ .general.bien .gv{color:var(--ok)}
+ .general .gs{font-size:11.5px;color:var(--dim);margin-top:2px}
+ .general .gd{margin-left:auto;text-align:right;font-size:10.5px;color:var(--dim);white-space:nowrap;line-height:1.5}
+ .aten{margin:0 0 6px}
+ .aten .ai{display:flex;align-items:baseline;gap:8px;font-size:12.5px;padding:7px 11px;border-radius:9px;
+   border:1px solid var(--line);background:var(--card);margin-bottom:5px}
+ .aten .ai.critico{border-color:#5c2f2f;background:#170e0d}
+ .aten .ai.atencion{border-color:#5a4a1e;background:#15110a}
+ .aten .ai.critico b{color:var(--bad)}
+ .aten .ai.atencion b{color:var(--warn)}
+ .aten .ai .aq{margin-left:auto;color:var(--dim);font-size:10.5px;white-space:nowrap}
+ .aten .nada{font-size:12px;color:var(--dim);padding:1px 2px 2px}
+ /* fila de equipo: siempre visible y comparable; el detalle vive en .cuerpo */
+ .perfil{padding:9px 12px}
+ .filaEq{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;padding:1px 0;
+   text-align:left;cursor:pointer;color:inherit;font:inherit}
+ .filaEq:hover .fnom{color:var(--gold2)}
+ .filaEq .punto{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#4a4d55}
+ .filaEq .punto.bueno{background:var(--ok)}
+ .filaEq .punto.atencion{background:var(--warn)}
+ .filaEq .punto.critico{background:var(--bad);animation:p 1.6s infinite}
+ .filaEq .avatar{width:32px;height:32px;border-radius:9px;flex:0 0 auto}
+ .filaEq .avatar svg{width:21px;height:21px}
+ .filaEq .fnom{font-size:13px;font-weight:700;white-space:nowrap}
+ .filaEq .frol{font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+ .filaEq .fsen{margin-left:auto;display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+ .filaEq .fs{font-size:11px;color:var(--dim);white-space:nowrap}
+ .filaEq .fs b{color:var(--txt);font-weight:600}
+ .filaEq .fs.atencion b{color:var(--warn)}
+ .filaEq .fs.critico b{color:var(--bad)}
+ .filaEq .chev{flex:0 0 auto;color:var(--dim);font-size:10px;margin-left:2px}
+ .perfil.abierto .filaEq .chev{transform:rotate(180deg)}
+ .perfil .cuerpo{display:none}
+ .perfil.abierto .cuerpo{display:block}
+ .pchips{margin-top:8px}
+ .sinsensor{font-size:10.5px;color:var(--dim);margin-top:8px;border-top:1px dashed #1e222a;padding-top:7px}
+ .bloq{font-size:10.5px;color:var(--dim);margin-top:8px;border-top:1px solid #171b22;padding-top:7px;line-height:1.6}
+ .bloq b{color:#8a857d;font-weight:600}
+ @media(max-width:600px){
+   .filaEq .frol{display:none}
+   .filaEq .fsen{gap:8px}
+   .filaEq .fs:nth-child(n+4){display:none}
+   .general .gv{font-size:17px}
+ }
+</style></head><body>
+
+<!-- ======= ICONOS VECTORIALES (SVG en linea, nada de emojis) ======= -->
+<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+ <symbol id="i-red" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></symbol>
+ <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 8.6a15 15 0 0 1 19 0M6.2 12.4a10 10 0 0 1 11.6 0M9.6 16.1a4.6 4.6 0 0 1 4.8 0"/><circle cx="12" cy="19.6" r="1"/></symbol>
+ <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><rect x="10.3" y="10.3" width="3.4" height="3.4" rx="1"/><path d="M10 3.4v2.2M14 3.4v2.2M10 18.4v2.2M14 18.4v2.2M3.4 10h2.2M3.4 14h2.2M18.4 10h2.2M18.4 14h2.2"/></symbol>
+ <symbol id="i-ram" viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="9.5" rx="2"/><path d="M6.5 7V4.4M10.2 7V4.4M13.8 7V4.4M17.5 7V4.4M7 19.6v-3.1M17 19.6v-3.1M7 10.5h10v2.5H7z"/></symbol>
+ <symbol id="i-temp" viewBox="0 0 24 24"><path d="M10 14.7V5.2a2 2 0 1 1 4 0v9.5a4.1 4.1 0 1 1-4 0z"/><circle cx="12" cy="17.3" r="1.4" fill="currentColor" stroke="none"/><path d="M15.6 6.5h3.2M15.6 9.5h2.2M15.6 12.5h3.2"/></symbol>
+ <symbol id="i-disco" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><circle cx="7.2" cy="7.5" r="1"/><circle cx="7.2" cy="16.5" r="1"/><path d="M12 7.5h6M12 16.5h3"/></symbol>
+ <symbol id="i-gpu" viewBox="0 0 24 24"><rect x="2.5" y="7" width="14.5" height="10" rx="2"/><circle cx="9.7" cy="12" r="3"/><path d="M9.7 9.6V12l2 1.4"/><path d="M17 10h2.6a1.4 1.4 0 0 1 1.4 1.4v1.2a1.4 1.4 0 0 1-1.4 1.4H17"/><path d="M6 17v2.2M12.5 17v2.2"/></symbol>
+ <symbol id="i-vram" viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="11" rx="2"/><path d="M7.5 6.5V3.4M12 6.5V3.4M16.5 6.5V3.4M7.5 17.5v3.1M12 17.5v3.1M16.5 17.5v3.1"/></symbol>
+ <symbol id="i-bat" viewBox="0 0 24 24"><rect x="2.2" y="7" width="17" height="10" rx="2.5"/><path d="M21.6 10.6v2.8"/><path d="M5.4 10.4h4.2v3.2H5.4z" fill="currentColor" stroke="none"/></symbol>
+ <symbol id="i-rayo" viewBox="0 0 24 24"><path d="M13.6 2.5 5.4 13.6h5.1L10 21.5l8.6-11.6h-5.2z"/></symbol>
+ <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.2V12l3.6 2.1"/></symbol>
+ <symbol id="i-caja" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6.2" rx="1.6"/><rect x="3" y="13.8" width="18" height="6.2" rx="1.6"/><path d="M6.8 7.1h1.6M6.8 16.9h1.6"/></symbol>
+ <symbol id="i-sitios" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5z"/><path d="M3 12.6l9 5 9-5"/><path d="M3 16.8l9 5 9-5"/></symbol>
+ <symbol id="i-nube" viewBox="0 0 24 24"><path d="M7.2 18.2h9.6a4 4 0 0 0 .4-8 6 6 0 0 0-11.5-1.4 3.9 3.9 0 0 0 1.5 9.4z"/><path d="M12 15.4v-5.2M9.9 12.2 12 10.1l2.1 2.1"/></symbol>
+ <symbol id="i-dinero" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6.8v10.4M14.7 9.2c-.7-.9-1.6-1.3-2.7-1.3-1.6 0-2.7.9-2.7 2.2 0 1.4 1.1 1.9 2.7 2.3 1.7.4 2.9.9 2.9 2.4 0 1.4-1.2 2.3-2.9 2.3-1.2 0-2.2-.4-2.9-1.4"/></symbol>
+ <symbol id="i-camara" viewBox="0 0 24 24"><path d="M4 8h2.8l1.5-2.3h7.4L17.2 8H20a1.6 1.6 0 0 1 1.6 1.6v7.8A1.6 1.6 0 0 1 20 19H4a1.6 1.6 0 0 1-1.6-1.6V9.6A1.6 1.6 0 0 1 4 8z"/><circle cx="12" cy="13.2" r="3.2"/></symbol>
+ <symbol id="i-foto" viewBox="0 0 24 24"><rect x="2.5" y="3.6" width="19" height="13" rx="2"/><path d="M8.6 20.4h6.8M12 16.6v3.8"/><path d="M8.4 10.4l2.3 2.3 4.2-4.8"/></symbol>
+ <symbol id="i-reiniciar" viewBox="0 0 24 24"><path d="M20.2 12a8.2 8.2 0 1 1-2.5-5.9"/><path d="M20.4 3.6v4.8h-4.8"/></symbol>
+ <symbol id="i-apagar" viewBox="0 0 24 24"><path d="M12 3.2v8.4"/><path d="M6.6 6.6a8 8 0 1 0 10.8 0"/></symbol>
+ <symbol id="i-pausa" viewBox="0 0 24 24"><rect x="6.8" y="4.4" width="3.8" height="15.2" rx="1.3"/><rect x="13.4" y="4.4" width="3.8" height="15.2" rx="1.3"/></symbol>
+ <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.6v14.8L19.6 12z"/></symbol>
+ <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5.4" y="5.4" width="13.2" height="13.2" rx="2.6"/></symbol>
+ <symbol id="i-escoba" viewBox="0 0 24 24"><path d="M20.2 3.8 11 13"/><path d="M14.4 6.6l3 3"/><path d="M9.6 13.2c-2.6.7-4.4 2.6-5 6.4 3.8-.6 5.7-2.4 6.4-5z"/></symbol>
+ <symbol id="i-llave" viewBox="0 0 24 24"><circle cx="8.2" cy="8.2" r="4.4"/><path d="M11.4 11.4 20.6 20.6M15.4 15.4l2.2-2.2M18 18l2.2-2.2"/></symbol>
+ <symbol id="i-candado" viewBox="0 0 24 24"><rect x="4.4" y="10.4" width="15.2" height="9.6" rx="2.2"/><path d="M8 10.4V8a4 4 0 0 1 8 0v2.4"/></symbol>
+ <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2.4 12S6 5.8 12 5.8 21.6 12 21.6 12 18 18.2 12 18.2 2.4 12 2.4 12z"/><circle cx="12" cy="12" r="2.9"/></symbol>
+ <symbol id="i-salud" viewBox="0 0 24 24"><path d="M2.4 12.4h4l2-4.4 3.2 8.6 2.5-6 1.6 3.4h5.9"/></symbol>
+ <symbol id="i-aviso" viewBox="0 0 24 24"><path d="M12 3.8 2.8 20h18.4z"/><path d="M12 9.6v4.6M12 17.2h.01"/></symbol>
+ <symbol id="i-ia" viewBox="0 0 24 24"><rect x="3.6" y="7.4" width="16.8" height="11.2" rx="3"/><path d="M12 4v3.4"/><circle cx="9" cy="13" r="1.3"/><circle cx="15" cy="13" r="1.3"/></symbol>
+ <symbol id="i-micro" viewBox="0 0 24 24"><rect x="7" y="2.6" width="10" height="18.8" rx="2.6"/><path d="M10.6 5.2h2.8"/><circle cx="12" cy="18" r="1"/></symbol>
+ <symbol id="i-android" viewBox="0 0 24 24"><path d="M5.6 13.4a6.4 6.4 0 0 1 12.8 0z"/><path d="M8.8 9.4 7 7.4M15.2 9.4 17 7.4"/><path d="M7.2 13.4v4a1.8 1.8 0 0 0 1.8 1.8h6a1.8 1.8 0 0 0 1.8-1.8v-4"/><circle cx="9.6" cy="11.2" r=".7" fill="currentColor" stroke="none"/><circle cx="14.4" cy="11.2" r=".7" fill="currentColor" stroke="none"/></symbol>
+ <symbol id="i-mundo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></symbol>
+ <symbol id="i-perfil" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.8"/><path d="M4.6 20.4c.9-3.7 3.9-5.7 7.4-5.7s6.5 2 7.4 5.7"/></symbol>
+</svg>
+
+<div class="wrap">
+
+<header>
+  <div><div class="kick">Enjambre · Óscar Omar GP</div><h1>Centro de control</h1></div>
+  <div class="live"><span class="dot"></span>en vivo<br><span id="act">…</span></div>
+</header>
+
+<nav class="tira">
+  <a href="#vigilancia">Ahora mismo</a><a href="#herramientas">Herramientas</a><a href="#remoto">Control remoto</a><a href="#equipos">Equipos</a><a href="#rapido">Control rápido</a>
+  <a href="#pantallas">Pantallas</a><a href="#camaras">Cámaras y audio</a><a href="#registro">Registro</a><a href="#trabajos">Trabajos</a>
+</nav>
+
+<div id="ultimaOrden" style="display:none;position:sticky;top:0;z-index:9;margin:-10px -10px 8px;padding:9px 14px;background:#12202b;border-bottom:1px solid var(--gold);font-size:12px;color:var(--txt)"></div>
+
+<div id="general" class="general"><div><div class="gv">Consultando…</div><div class="gs"></div></div></div>
+<div id="atencion" class="aten"></div>
+
+<div class="vig" id="vigilancia">
+  <span id="vPantallas"><svg class="ic"><use href="#i-ojo"></use></svg> pantallas: …</span>
+  <span id="vCamaras"><svg class="ic"><use href="#i-camara"></use></svg> cámaras: …</span>
+  <span id="vPausa"><svg class="ic"><use href="#i-pausa"></use></svg> pausa: …</span>
+  <span id="vSalud" style="display:none"><svg class="ic"><use href="#i-salud"></use></svg> equipos: …</span>
+</div>
+
+<div class="card lock off" id="candado">
+  <div class="t"><span id="lockT">Trabajando ahora</span><span id="lockN"></span></div>
+  <div class="big" id="lockBig">Consultando…</div>
+  <div class="sub" id="lockSub"></div>
+  <div class="latido" id="lockLat"></div>
+</div>
+
+<h2 id="herramientas"><svg class="ic"><use href="#i-perfil"></use></svg> Herramientas <span class="cr" style="text-transform:none;letter-spacing:0">— se abren en otra pestaña</span></h2>
+<div style="display:flex;flex-wrap:wrap;gap:9px;margin:0 0 16px">
+  <a href="/panel/consola.html" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Consola en vivo</b><br><small style="color:#7fbf9d">qué está pasando ahora</small></a>
+  <a href="/panel/" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Centro de control</b><br><small style="color:#7fbf9d">esta misma página</small></a>
+  <a href="https://nexus.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Tareas (Nexus)</b><br><small style="color:#7fbf9d">pendientes, dinero, clientes</small></a>
+  <a href="https://files.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Archivos</b><br><small style="color:#7fbf9d">documentos y respaldos</small></a>
+  <a href="https://musica.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Música</b><br><small style="color:#7fbf9d">tu biblioteca</small></a>
+  <a href="https://webmail.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Webmail</b><br><small style="color:#7fbf9d">correo del dominio</small></a>
+  <a href="https://n8n.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Automatización (n8n)</b><br><small style="color:#7fbf9d">flujos y bots</small></a>
+  <a href="https://multimedia.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Multimedia</b><br><small style="color:#7fbf9d">películas y series</small></a>
+  <a href="https://contrasenas.oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Contraseñas</b><br><small style="color:#7fbf9d">bóveda segura</small></a>
+  <a href="/panel/enlaces.html" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #4a4a3b;border-radius:9px;text-decoration:none;background:rgba(30,28,15,.45);color:#e0d9b8;font-size:13px;line-height:1.35"><b>Todos los enlaces</b><br><small style="color:#b8af7f">índice completo</small></a>
+  <a href="https://oscaromargp.xyz" target="_blank" rel="noopener" style="display:block;padding:9px 13px;border:1px solid #2b6b4a;border-radius:9px;text-decoration:none;background:rgba(10,40,25,.45);color:#cfe9dc;font-size:13px;line-height:1.35"><b>Mi sitio</b><br><small style="color:#7fbf9d">lo público</small></a>
+</div>
+
+<h2 id="remoto"><svg class="ic"><use href="#i-ojo"></use></svg> Control remoto (RustDesk)</h2>
+<div class="card" style="border-color:#4a3a1e;background:linear-gradient(180deg,#17130b,#0e1218)">
+  <div style="font-size:11px;color:#b8af7f;margin-bottom:8px">Ver la pantalla y controlar el teclado/ratón de otra máquina (como TeamViewer). Abre <b>RustDesk</b> en cualquier equipo, escribe el ID y conecta.</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+    <div style="border:1px solid #3a3d45;border-radius:9px;padding:10px 12px;background:#0d1016">
+      <div style="font-size:9.5px;letter-spacing:.16em;color:#98938a;text-transform:uppercase">F16 (Windows)</div>
+      <div style="font-family:Consolas,Menlo,monospace;font-size:22px;color:#e8d9a8;margin:4px 0">58233216</div>
+      <div style="font-size:10px;color:#98938a">GPU RTX 4050 · diseño y video</div>
+    </div>
+    <div style="border:1px solid #3a3d45;border-radius:9px;padding:10px 12px;background:#0d1016">
+      <div style="font-size:9.5px;letter-spacing:.16em;color:#98938a;text-transform:uppercase">Vivobook Go (Linux)</div>
+      <div style="font-family:Consolas,Menlo,monospace;font-size:22px;color:#e8d9a8;margin:4px 0">59219535</div>
+      <div style="font-size:10px;color:#98938a">Linux Mint · desarrollo</div>
+    </div>
+  </div>
+  <div style="font-size:10px;color:#98938a;margin-top:8px">Servidor propio: 173.224.115.243 (no pasa por servidores de terceros).</div>
+</div>
+
+<h2 id="equipos"><svg class="ic"><use href="#i-perfil"></use></svg> Equipos <span id="eqResumen" style="text-transform:none;letter-spacing:0"></span></h2>
+<div id="lista-equipos"></div>
+
+<h2 id="rapido"><svg class="ic"><use href="#i-rayo"></use></svg> Control rápido <span class="cr" style="text-transform:none;letter-spacing:0">— órdenes para todo el Enjambre</span></h2>
+<div class="card">
+  <div class="btns">
+    <button onclick="orden('vivo_on')"><svg class="ic"><use href="#i-ojo"></use></svg><b>Ver pantallas</b><small>en vivo, las 2</small></button>
+    <button onclick="orden('vivo_off')"><svg class="ic"><use href="#i-ojo"></use></svg><b>Apagar pantallas</b><small>dejar de ver</small></button>
+    <button onclick="orden('camara_on')"><svg class="ic"><use href="#i-camara"></use></svg><b>Cámaras y audio</b><small>las 2 computadoras</small></button>
+    <button onclick="orden('camara_off')"><svg class="ic"><use href="#i-camara"></use></svg><b>Apagar cámaras</b><small>privacidad</small></button>
+    <button onclick="orden('captura_todo')"><svg class="ic"><use href="#i-foto"></use></svg><b>Capturar todo</b><small>foto de pantalla</small></button>
+    <button onclick="orden('pausar')"><svg class="ic"><use href="#i-pausa"></use></svg><b>Pausar</b><small>congela sin cerrar</small></button>
+    <button onclick="orden('reanudar')"><svg class="ic"><use href="#i-play"></use></svg><b>Reanudar</b><small>sigue donde iba</small></button>
+    <button onclick="orden('respaldo')"><svg class="ic"><use href="#i-nube"></use></svg><b>Respaldar</b><small>sitios y base</small></button>
+    <button onclick="orden('estado')"><svg class="ic"><use href="#i-reiniciar"></use></svg><b>Refrescar</b><small>pedir estado</small></button>
+    <button onclick="orden('privacidad_off')"><svg class="ic"><use href="#i-candado"></use></svg><b>Todo apagado</b><small>pantallas + cámaras + micrófonos</small></button>
+    <button class="peligro" onclick="dosPaso(this,'detener')"><svg class="ic"><use href="#i-stop"></use></svg><b>Detener a Hermes</b><small>frena el trabajo en curso</small></button>
+  </div>
+  <div class="caja" id="cajaClave" style="display:none">
+    <input id="claveIn" placeholder="pega aquí la clave de acciones">
+    <button style="min-width:auto" onclick="guardarClave()"><b>Guardar</b></button>
+  </div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<h2 id="pantallas"><svg class="ic"><use href="#i-foto"></use></svg> Pantallas <span id="pvEstado" style="text-transform:none;letter-spacing:0"></span></h2>
+<div class="card">
+  <div class="btns mini">
+    <button onclick="orden('captura_f16')"><svg class="ic"><use href="#i-foto"></use></svg><b>F16</b><small>foto suelta</small></button>
+    <button onclick="orden('captura_go')"><svg class="ic"><use href="#i-foto"></use></svg><b>Go</b><small>foto suelta</small></button>
+    <button onclick="orden('captura_cente')"><svg class="ic"><use href="#i-foto"></use></svg><b>CENTE</b><small>foto suelta</small></button>
+  </div>
+  <div class="vistas dos" id="cajasPantalla" style="margin-top:9px;display:none">
+    <div class="vista"><div class="pie"><span>ASUS TUF F16</span><span id="pf16"></span></div><img id="vf16" alt="pantalla F16"></div>
+    <div class="vista"><div class="pie"><span>VIVOBOOK GO</span><span id="pgo"></span></div><img id="vgo" alt="pantalla Go"></div>
+  </div>
+  <div id="cajaFoto" style="display:none;margin-top:10px"></div>
+  <div class="cr" id="pvNota" style="margin-top:8px">Encendidas con "Ver pantallas". Se apagan solas en 10 minutos.</div>
+</div>
+
+<h2 id="camaras"><svg class="ic"><use href="#i-camara"></use></svg> Cámaras y audio <span id="pcEstado" style="text-transform:none;letter-spacing:0"></span></h2>
+<div class="card">
+  <div class="vistas dos" id="cajasCamara" style="display:none">
+    <div class="vista"><div class="pie"><span>CÁMARA · F16</span><span id="cf16"></span></div><img id="camf16" alt="cámara F16">
+      <audio id="audf16" controls></audio></div>
+    <div class="vista"><div class="pie"><span>CÁMARA · GO</span><span id="cgo"></span></div><img id="camgo" alt="cámara Go">
+      <audio id="audgo" controls></audio></div>
+  </div>
+  <div class="btns mini" style="margin-top:8px">
+    <button onclick="arrancarAudio()"><svg class="ic"><use href="#i-play"></use></svg><b>Escuchar</b><small>el navegador pide un toque</small></button>
+  </div>
+  <div class="cr" id="pcNota" style="margin-top:7px">Encendidas con "Cámaras y audio". Se apagan solas en 10 minutos. El botón "Foto de cámara" de cada equipo saca una sola foto y apaga la cámara.</div>
+</div>
+
+<h2 id="registro"><svg class="ic"><use href="#i-reloj"></use></svg> Registro de lo que ha pasado</h2>
+<div class="card" id="log"><div class="cr">Cargando…</div></div>
+
+<h2 id="trabajos"><svg class="ic"><use href="#i-caja"></use></svg> Últimos trabajos de Hermes</h2>
+<div class="card" id="hist"><div class="cr">Sin historial.</div></div>
+
+<footer>Panel del Enjambre · se actualiza solo · Óscar Omar GP · Chametla, BCS<br><span id="gen"></span></footer>
+</div>
+
+<script>
+/* ---------- clave de acciones (no cambia) ---------- */
+const K0 = new URLSearchParams(location.search).get('k') || localStorage.getItem('k_enjambre') || '';
+if(new URLSearchParams(location.search).get('k')) localStorage.setItem('k_enjambre', new URLSearchParams(location.search).get('k'));
+let clave = K0;
+
+function guardarClave(){
+  const v=document.getElementById('claveIn').value.trim();
+  if(v.length<10){alert('La clave es más larga (32 caracteres).');return}
+  localStorage.setItem('k_enjambre',v); clave=v;
+  document.getElementById('cajaClave').style.display='none';
+  aviso('Clave guardada. Ya puedes dar órdenes.');
+}
+function aviso(t){const m=document.getElementById('msg');m.style.display='block';m.textContent=t}
+function min(s){if(s===null||s===undefined)return 'sin señal';const m=Math.floor(s/60);return m>0?('hace '+m+' min'):('hace '+s+' s')}
+function esc(s){return String(s===null||s===undefined?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
+function ic(n){return '<svg class="ic'+(n==='play'||n==='rayo'?' fill':'')+'"><use href="#i-'+n+'"></use></svg>'}
+function barra(v){const n=Math.max(0,Math.min(100,Number(v)||0));return '<div class="bar"><i style="width:'+n+'%"></i></div>'}
+
+/* ---------- avatares: uno por TIPO de equipo (dibujados a mano en SVG) ---------- */
+const AVATARES = {
+ servidor:'<svg viewBox="0 0 64 64"><rect x="15" y="7" width="34" height="50" rx="4"/><path d="M15 24h34M15 41h34"/><circle cx="22" cy="15.5" r="1.7"/><path d="M27.5 15.5h14"/><circle cx="22" cy="32.5" r="1.7"/><path d="M27.5 32.5h14"/><circle cx="22" cy="49.5" r="1.7"/><path d="M27.5 49.5h9"/><path d="M49 18h5M49 32h5M49 46h5"/></svg>',
+ gpu:'<svg viewBox="0 0 64 64"><rect x="12" y="13" width="40" height="27" rx="3"/><path d="M7 47h50l-4-7H11z"/><rect x="24" y="21" width="16" height="11" rx="2"/><path d="M24 24.5h-4M24 28.5h-4M40 24.5h4M40 28.5h4M29 21v-2M35 21v-2"/><path d="M26 43h12"/></svg>',
+ ligera:'<svg viewBox="0 0 64 64"><rect x="15" y="15" width="34" height="23" rx="3"/><path d="M9 46h46l-3-6H12z"/><path d="M24 41h16"/><path d="M22 22h8v4h-8z"/></svg>',
+ escritorio:'<svg viewBox="0 0 64 64"><rect x="8" y="10" width="48" height="30" rx="3"/><path d="M26 40h12v7H26z"/><path d="M17 51h30"/><path d="M15 17h18v5H15z"/><circle cx="46" cy="19.5" r="2"/><path d="M15 29h34"/></svg>',
+ celular:'<svg viewBox="0 0 64 64"><rect x="21" y="7" width="22" height="50" rx="5"/><path d="M28 12h8"/><circle cx="32" cy="50" r="1.8"/><path d="M27 20h10M27 25h6"/></svg>',
+ desconocido:'<svg viewBox="0 0 64 64"><rect x="12" y="12" width="40" height="40" rx="6"/><path d="M26 26h12v12H26z"/></svg>'
+};
+
+/* ---------- que trae dato y que NUNCA lo va a traer ---------- */
+function tieneDato(m){return !(m.valor===null||m.valor===undefined||m.valor==='')}
+function esNoAplica(m){
+  if(tieneDato(m)) return false;
+  return /no tiene|no aplica|sin sensor|no trae|no cuenta|no dispone|no la tiene/i.test(m.nota||'');
+}
+function nivelPct(p){const n=Number(p);if(isNaN(n))return '';return n>=90?'critico':(n>=75?'atencion':'')}
+
+/* ---------- señales de la fila: solo las que traen numero, lo grave primero ---------- */
+function senal(m){
+  return '<span class="fs '+nivelPct(m.pct)+'">'+esc(m.etq)+' <b>'+esc(m.valor)+'</b></span>';
+}
+
+/* ---------- ordenes bloqueadas: UNA linea con el por que, no un parrafo por boton ---------- */
+function bloqueadasHtml(ordenes){
+  const b=(ordenes||[]).filter(function(o){return !o.activo});
+  if(!b.length) return '';
+  const g={};
+  b.forEach(function(o){const r=(o.razon||'No disponible desde el panel');(g[r]=g[r]||[]).push(o.t)});
+  const filas=Object.keys(g).map(function(r){
+    return '<div><b>'+g[r].map(esc).join(' · ')+'</b> — '+esc(r)+'</div>';
+  }).join('');
+  return '<div class="bloq">'+ic('candado')+'<b>No se pueden dar desde aquí:</b>'+filas+'</div>';
+}
+
+/* ---------- abrir/cerrar el detalle de un equipo ---------- */
+function alternar(el){
+  const p=el.closest?el.closest('.perfil'):null; if(!p) return;
+  p.classList.toggle('abierto');
+  el.setAttribute('aria-expanded', p.classList.contains('abierto')?'true':'false');
+}
+
+/* ---------- una casilla de metrica (con su icono) ---------- */
+function metrica(m){
+  const sd = !tieneDato(m);
+  const val = sd ? '<span class="sd">sin dato</span>' : esc(m.valor);
+  return '<div class="mi'+(m.ancho?' ancho':'')+'"><div class="mil">'+ic(m.ico)+'<span>'+esc(m.etq)+'</span></div>'
+       + '<div class="miv'+(sd?' sd':'')+'">'+val+'</div>'
+       + (m.pct!==null&&m.pct!==undefined?barra(m.pct):'')
+       + (m.nota?'<div class="minota">'+esc(m.nota)+'</div>':'')+'</div>';
+}
+
+/* ---------- un botón de orden (o apagado con la razón escrita) ---------- */
+function botonOrden(o, maquina){
+  if(!o.activo){
+    return '<button class="off" disabled title="'+esc(o.razon)+'">'+ic(o.ico)
+         + '<b>'+esc(o.t)+'</b><small>'+esc(o.razon)+'</small></button>';
+  }
+  const accion = o.riesgo
+    ? "dosPaso(this,'"+o.cmd+"')"
+    : "orden('"+o.cmd+"')";
+  const nota = (o.global?'orden global · ':'')+(o.nota||'');
+  return '<button class="'+(o.riesgo?'peligro':'')+'" onclick="'+accion+'">'+ic(o.ico)
+       + '<b>'+esc(o.t)+'</b><small>'+esc(nota)+'</small></button>';
+}
+
+/* ---------- el equipo: fila comparable siempre visible + detalle que se despliega ---------- */
+function perfil(e, ultima){
+  const s = e.salud||{nivel:'apagado',texto:'sin respuesta',motivos:[]};
+  const nivel = esc(s.nivel||'apagado');
+  const red = (e.red||{});
+  const avatar = AVATARES[e.tipo]||AVATARES.desconocido;
+  const ms = (e.metricas||[]);
+  const conDato = ms.filter(tieneDato);
+  const noAplica = ms.filter(esNoAplica);
+
+  // Fila: 3 señales NUMÉRICAS, la más comprometida primero. Lo que no trae dato no ocupa la fila.
+  const orden = conDato.filter(function(m){return m.etq!=='Red'});
+  orden.sort(function(a,b){return (Number(b.pct)||0)-(Number(a.pct)||0)});
+  const sen = e.vivo ? orden.slice(0,3).map(senal).join('') : '';
+  const fila = '<button class="filaEq" onclick="alternar(this)" aria-expanded="false">'
+   + '<span class="punto '+nivel+'"></span>'
+   + '<div class="avatar">'+avatar+'</div>'
+   + '<span class="fnom">'+esc(e.nombre)+'</span>'
+   + '<span class="frol">'+esc(e.rol||'')+'</span>'
+   + '<span class="fsen">'+sen+'<span class="chev">&#9660;</span></span>'
+   + '</button>';
+
+  const chipRed = red.vivo
+    ? '<span class="chip vivo">'+ic('red')+'conectado'+(red.ip?' · '+esc(red.ip):'')+'</span>'
+    : (red.en_red
+        ? '<span class="chip atencion">'+ic('wifi')+'en la red privada · sin respuesta</span>'
+        : '<span class="chip muerto">'+ic('red')+'sin conexión'+(red.detalle?' · '+esc(red.detalle):'')+'</span>');
+  const motivos = (s.motivos||[]).length
+    ? '<div class="motivos">'+ic('aviso')+' '+s.motivos.map(esc).join(' · ')+'</div>' : '';
+  const act = (e.actividad||[]).map(function(a){return '<span>'+esc(a)+'</span>'}).join('');
+  const notas = (e.notas||[]).filter(Boolean).map(function(n){return '<div class="nota">'+esc(n)+'</div>'}).join('');
+
+  // Casillas SOLO con dato. Lo vacío se cuenta en una línea en vez de en cinco casillas mudas.
+  const casillas = conDato.map(metrica).join('');
+  const vacias = ms.filter(function(m){return !tieneDato(m)&&!esNoAplica(m)}).map(function(m){return m.etq});
+  const lineaSinDato = vacias.length
+    ? '<div class="sinsensor">Sin dato: '+esc(vacias.join(' · '))+(e.vivo?'':' — el equipo no responde')+'</div>' : '';
+  const lineaNoAplica = noAplica.length
+    ? '<div class="sinsensor">No existe en este equipo: '+esc(noAplica.map(function(m){return m.etq}).join(' · '))+'</div>' : '';
+
+  const activas = (e.ordenes||[]).filter(function(o){return o.activo});
+  const cmds = activas.length
+    ? '<div class="cmdtit">'+ic('llave')+'<span>Órdenes de '+esc(e.nombre)+'</span></div>'
+      + '<div class="cmds">'+activas.map(function(o){return botonOrden(o,e.clave)}).join('')+'</div>'
+    : '';
+  const ult = '<div class="ult" id="'+idUltima(e)+'">'+(ultima
+    ? ('Última orden a este equipo: <b>'+esc(ultima.orden)+'</b> · '+esc(ultima.hora||'')+'<br>'+esc(ultima.resultado||''))
+    : '')+'</div>';
+
+  return '<article class="perfil '+(e.vivo?'':'down ')+nivel+'">'
+   + fila
+   + '<div class="cuerpo">'
+   +   '<div class="pchips">'
+   +     '<span class="chip '+(e.vivo?'vivo':'muerto')+'">'+ic(e.vivo?'salud':'aviso')+(e.vivo?'EN LÍNEA':'SIN RESPUESTA')+'</span>'
+   +     chipRed
+   +     '<span class="chip '+nivel+'">'+ic('salud')+'salud '+esc(s.texto)+'</span>'
+   +   '</div>'+motivos
+   +   (casillas?'<div class="metricas">'+casillas+'</div>':'')
+   +   lineaSinDato + lineaNoAplica
+   +   (act?'<div class="act">'+act+'</div>':'')
+   +   notas
+   +   cmds
+   +   bloqueadasHtml(e.ordenes)
+   +   ult
+   + '</div></article>';
+}
+
+async function cargar(){
+  try{
+    const d=await (await fetch('datos.json?t='+Date.now())).json();
+    // los trabajos REALES en curso: los escribe progreso.sh y son los mismos que muestra la consola
+    let prog={trabajos:{}};
+    try{ prog=await (await fetch('progreso.json?t='+Date.now(),{cache:'no-store'})).json(); }catch(e){}
+    const trabajosEnCurso=Object.entries(prog.trabajos||{}).filter(function(p){ return p[1] && (p[1].estado==='corriendo' || p[1].estado==='error'); });
+    document.getElementById('act').textContent='actualizado '+(d.hora_local||'');
+    document.getElementById('gen').textContent='datos de '+(d.generado||'').replace('T',' ').replace('Z',' UTC');
+    const t=d.trabajos||{activos:[],historial:[]};
+    const pau=d.pausa||{};
+    const lock=document.getElementById('candado');
+    if(trabajosEnCurso.length){
+      const hayError=trabajosEnCurso.some(function(p){ return p[1].estado==='error'; });
+      lock.className='card lock '+(hayError?'pausa':'on');
+      document.getElementById('lockT').textContent=hayError?'⚠ Trabajo con error':'🔒 Trabajando ahora';
+      document.getElementById('lockN').textContent=trabajosEnCurso.length+' en curso';
+      document.getElementById('lockBig').innerHTML=trabajosEnCurso.map(function(p){
+        return esc(p[1].titulo||'')+' <span style="color:var(--gold)">· '+p[0].toUpperCase()+'</span>'; }).join('<br>');
+      document.getElementById('lockSub').textContent=trabajosEnCurso.map(function(p){
+        const t=p[1]; return p[0].toUpperCase()+': '+(t.paso||0)+' de '+((t.pasos||[]).length)+' pasos'
+          + (t.inicio?(' (empezó '+t.inicio+')'):''); }).join(' · ');
+    }else if(t.activos&&t.activos.length){
+      lock.className='card lock '+(pau.pausado?'pausa':'on');
+      document.getElementById('lockT').textContent=(pau.pausado?'⏸ Trabajo PAUSADO':'🔒 Trabajando ahora');
+      document.getElementById('lockN').textContent=t.activos.length+' en curso';
+      document.getElementById('lockBig').innerHTML=t.activos.map(function(a){
+        return esc(a.que)+' <span style="color:var(--gold)">· '+String(a.equipo||'').toUpperCase()+'</span>'}).join('<br>');
+      document.getElementById('lockSub').textContent=(t.activos.map(function(a){return a.avance}).filter(Boolean).join(' · ')||'')
+        +'  desde '+(t.activos[0].desde_local||'')+(pau.pausado?'  · pausado desde '+(pau.desde||''):'');
+    }else{
+      lock.className='card lock off';
+      document.getElementById('lockT').textContent='Sin trabajos en curso';
+      document.getElementById('lockN').textContent='';
+      document.getElementById('lockBig').textContent='Nada trabajando en este momento';
+      document.getElementById('lockSub').textContent='Cuando empiece algo, aparecerá aquí.';
+    }
+    document.getElementById('lockLat').textContent='Última señal de Hermes '+min(d.latido_segundos);
+
+    // la pausa, siempre visible arriba
+    const vp=document.getElementById('vPausa');
+    vp.className=pau.pausado?'si':'';
+    vp.innerHTML=ic('pausa')+' pausa: '+(pau.pausado?('SÍ · '+esc(pau.desde||'')+' ('+(pau.cuantos||0)+' procesos)'):'no');
+    const r=d.resumen||{};
+    const vs=document.getElementById('vSalud');
+    vs.className=(r.estado_global==='bien'?'':(r.estado_global==='atencion'?'on':'si'));
+    vs.innerHTML=ic('salud')+' equipos: '+(r.vivos!==undefined?r.vivos:'?')+' de '+(r.total!==undefined?r.total:'?')+' en línea'
+      + (r.con_problema?(' · '+r.con_problema+' con aviso'):'');
+
+    // perfiles (ordenados por estado; el dato lo arma el servidor)
+    const eq=d.equipos||[];
+    cargar._equipos=eq;
+    const porEquipo=ultimasPorEquipo(ultimasCache);
+    // recordar que equipos dejo abiertos el usuario, para no cerrarselos cada 30 s
+    const abiertos={};
+    [].slice.call(document.querySelectorAll('#lista-equipos .perfil')).forEach(function(p,i){
+      if(p.classList.contains('abierto')) abiertos[i]=1;
+    });
+    const primera=!cargar._pintado; cargar._pintado=true;
+    document.getElementById('lista-equipos').innerHTML=eq.map(function(e){
+      return perfil(e, porEquipo[llaveUltima(e)]);
+    }).join('');
+    // el que pide atencion se abre solo; los sanos quedan en una linea
+    [].slice.call(document.querySelectorAll('#lista-equipos .perfil')).forEach(function(p,i){
+      const e=eq[i]; if(!e) return;
+      const nivel=(e.salud||{}).nivel;
+      const abre = abiertos[i] || (primera && (nivel==='critico'||nivel==='atencion'));
+      if(abre){ p.classList.add('abierto');
+        const b=p.querySelector('.filaEq'); if(b) b.setAttribute('aria-expanded','true'); }
+    });
+    pintarUltimas(ultimasCache);
+    const vivos=eq.filter(function(x){return x.vivo}).length;
+    document.getElementById('eqResumen').textContent='— '+vivos+' de '+eq.length+' en línea';
+
+    /* ---- LO PRIMERO: el veredicto en 2 segundos y solo lo que pide atencion ---- */
+    let at='';
+    eq.forEach(function(e){
+      const s=e.salud||{}; const nivel=s.nivel||'apagado';
+      if(nivel==='bueno') return;
+      const cls=(nivel==='critico')?'critico':((nivel==='atencion')?'atencion':'');
+      const mot=(s.motivos&&s.motivos.length)?s.motivos:[s.texto||'sin respuesta'];
+      mot.forEach(function(m){
+        at+='<div class="ai '+cls+'">'+ic(cls==='critico'?'aviso':'salud')
+          +'<span><b>'+esc(e.nombre)+'</b> — '+esc(m)+'</span>'
+          +'<span class="aq">'+esc(e.rol||'')+'</span></div>';
+      });
+    });
+    const urgentes=eq.filter(function(e){return ['critico','atencion'].indexOf((e.salud||{}).nivel)>=0}).length;
+    const eg=((r.estado_global==='critico'||r.estado_global==='atencion')?r.estado_global:(urgentes?'atencion':'bien'));
+    const gv={critico:'Crítico',atencion:'Pide atención',bien:'Todo en orden'}[eg];
+    const gs=(urgentes
+      ? (urgentes+' de '+eq.length+' equipos con algo que atender · '+vivos+' en línea')
+      : (vivos+' de '+eq.length+' equipos en línea · nada pendiente que resolver'));
+    const gc=document.getElementById('general');
+    gc.className='general '+eg;
+    gc.innerHTML='<div><div class="gv">'+esc(gv)+'</div><div class="gs">'+esc(gs)+'</div></div>'
+      +'<div class="gd">'+(pau.pausado?'⏸ trabajo pausado<br>':'')
+      +'en línea: '+vivos+'/'+eq.length+'<br>actualizado '+esc(d.hora_local||'')+'</div>';
+    document.getElementById('atencion').innerHTML = at
+      ? at
+      : '<div class="nada">Nada requiere tu atención ahora: los '+eq.length+' equipos reportan bien.</div>';
+
+    const h=(t.historial||[]).slice(0,8);
+    document.getElementById('hist').innerHTML=h.length?h.map(function(x){
+      return '<div class="fila"><span>'+esc(x.que)+'</span><span>'+String(x.equipo||'').toUpperCase()+' · '+esc(x.desde_local||'')+'</span></div>'
+    }).join(''):'<div class="cr">Sin historial.</div>';
+  }catch(e){document.getElementById('act').textContent='sin conexión'}
+}
+
+/* ---------- última orden enviada a cada equipo ---------- */
+let ultimasCache={historial:[],ultima:null};
+function llaveUltima(e){return (e.clave==='vivobook')?'go':e.clave}
+function idUltima(e){return 'perfil-'+e.clave+(e.clave==='celular'?('-'+String(e.nombre||'').replace(/[^A-Za-z0-9]/g,'')):'')}
+function ultimasPorEquipo(j){
+  const res={};
+  const hist=(j&&j.historial)||[];
+  for(let i=0;i<hist.length;i++){
+    const h=hist[i]; const eq=h.equipo||'servidor';
+    const llaves = eq==='f16+go' ? ['f16','go'] : [eq];
+    llaves.forEach(function(k){ if(!res[k]) res[k]=h; });
+  }
+  return res;
+}
+function pintarUltimas(j){
+  const porEquipo=ultimasPorEquipo(j);
+  (cargar._equipos||[]).forEach(function(e){
+    const el=document.getElementById(idUltima(e));
+    if(!el) return;
+    const ux=porEquipo[llaveUltima(e)];
+    el.innerHTML = ux ? ('Última orden a este equipo: <b>'+esc(ux.orden)+'</b> · '+esc(ux.hora||'')+'<br>'+esc(ux.resultado||'')) : '';
+  });
+}
+async function cargarUltimaOrden(){
+  try{
+    const j=await (await fetch('acciones/resultado.json?t='+Date.now())).json();
+    ultimasCache=j;
+    const u=j.ultima||{};
+    pintarUltimas(j);
+    if(!u.orden) return;
+    const caja=document.getElementById('ultimaOrden');
+    const bien=/lista|encendida|apagad|actualizado|lanz|respald|pausad|reanudad|detenid/i.test(u.resultado||'');
+    const mal=/no pude|fallo|error|desconocida|no habia|no hay nada/i.test(u.resultado||'');
+    caja.style.display='block';
+    caja.style.background = mal?'#2b1512' : (bien?'#12202b':'#1d1a12');
+    caja.style.borderBottomColor = mal?'#e0625a' : (bien?'#4ec98a':'#c9a24b');
+    caja.innerHTML='<b>Última orden:</b> '+esc(u.orden)+(u.equipo?' <span style="color:var(--dim)">· '+esc(u.equipo)+'</span>':'')
+      +' <span style="color:var(--dim)">· '+esc(u.hora||'')+'</span><br><span style="color:'+(mal?'#e0625a':'#e8d9a8')+'">'+esc(u.resultado||'')+'</span>';
+  }catch(e){}
+}
+async function cargarFotos(){
+  const caja=document.getElementById('cajaFoto');
+  let html='';
+  for(const [q,nombre] of [['f16','ASUS TUF F16'],['go','VIVOBOOK GO'],['cente','CENTE']]){
+    try{
+      const r=await fetch('capturas/'+q+'.jpg',{method:'HEAD',cache:'no-store'});
+      if(!r.ok) continue;
+      const lm=r.headers.get('last-modified');
+      const mins=lm?Math.round((Date.now()-new Date(lm))/60000):null;
+      const viejo=mins!==null&&mins>10;
+      if(viejo){
+        // Regla de Oscar (24-sep-2026): no enseñar fotos viejas de un equipo apagado.
+        // Aquí solo se dice que hay una y de cuándo es; la foto se pide y se saca al momento.
+        html+='<div style="margin-bottom:10px"><div class="ml" style="color:var(--dim)">Foto de '+nombre
+          +' · la última es de hace '+mins+' min, NO se muestra (sácala con «Capturar todo»)</div></div>';
+        continue;
+      }
+      html+='<div style="margin-bottom:10px"><div class="ml" style="color:var(--dim)">Foto de '+nombre
+        +(mins!==null?(' · reciente ('+mins+' min)'):'')
+        +'</div><img src="capturas/'+q+'.jpg?t='+Date.now()+'" style="width:100%;border-radius:8px;border:1px solid var(--line)"></div>';
+    }catch(e){}
+  }
+  caja.style.display=html?'block':'none';
+  caja.innerHTML=html;
+}
+async function cargarPantallas(){
+  try{
+    const j=await (await fetch('vivo/estado.json?t='+Date.now())).json();
+    const on=j.encendida===true;
+    document.getElementById('cajasPantalla').style.display=on?'grid':'none';
+    document.getElementById('pvEstado').textContent=on?('— encendidas · '+(j.ultima||'')):'— apagadas';
+    const vp=document.getElementById('vPantallas');
+    vp.className=on?'si':'';
+    vp.innerHTML=ic('ojo')+' pantallas: '+(on?('ENCENDIDAS · '+esc(j.ultima||'')):'apagadas');
+    if(on){const t=Date.now();
+      for(const [id] of [['vf16'],['vgo']]){
+        document.getElementById(id).src='vivo/'+id.slice(1)+'.png?t='+t;
+      }
+    }
+  }catch(e){document.getElementById('cajasPantalla').style.display='none'}
+}
+
+let camActivado=false, camSonando={f16:false,go:false}, camUltimo={}, camCola={f16:[],go:[]};
+function arrancarAudio(){camActivado=true;reproducir('f16');reproducir('go')}
+function reproducir(q){
+  const a=document.getElementById('aud'+q);
+  if(!a||camSonando[q]||!camCola[q].length)return;
+  if(!camActivado){document.getElementById('pcNota').textContent='toca "▶ Escuchar" para oír el micrófono';return}
+  const c=camCola[q].shift();camUltimo[q]=c;camSonando[q]=true;
+  a.src='audio/'+q+'/'+c;
+  a.play().catch(function(){camSonando[q]=false});
+}
+document.addEventListener('DOMContentLoaded',function(){
+  for(const q of ['f16','go']){
+    const a=document.getElementById('aud'+q);
+    if(a)a.addEventListener('ended',function(){camSonando[q]=false;reproducir(q)});
+  }
+  if(!localStorage.getItem('k_enjambre'))document.getElementById('cajaClave').style.display='flex';
+});
+async function cargarCamaras(){
+  try{
+    const j=await (await fetch('camara/estado.json?t='+Date.now())).json();
+    const on=j.encendida===true;
+    document.getElementById('cajasCamara').style.display=on?'grid':'none';
+    document.getElementById('pcEstado').textContent=on?('— encendidas · '+(j.ultima||'')):'— apagadas';
+    const vc=document.getElementById('vCamaras');
+    vc.className=on?'si':'';
+    vc.innerHTML=ic('camara')+' cámaras: '+(on?('ENCENDIDAS · '+esc(j.ultima||'')):'apagadas');
+    if(!on){camCola={f16:[],go:[]};return}
+    const t=Date.now();
+    for(const q of ['f16','go']){
+      const info=j[q]||{}, img=document.getElementById('cam'+q), pie=document.getElementById('c'+q);
+      if(info.hay){img.src='camara/'+q+'.jpg?t='+t;img.style.display='block'}else{img.style.display='none'}
+      pie.textContent=info.hay?'recibiendo':'sin imagen';
+      try{
+        const ja=await (await fetch('audio/'+q+'/indice.json?t='+Date.now())).json();
+        for(const c of (ja.chunks||[]))if(!camCola[q].includes(c)&&c!==camUltimo[q])camCola[q].push(c);
+      }catch(e){}
+    }
+    document.getElementById('pcNota').textContent='audio pendiente: '+(camCola.f16.length+camCola.go.length)+' tanda(s)';
+    reproducir('f16');reproducir('go');
+  }catch(e){document.getElementById('cajasCamara').style.display='none'}
+}
+
+async function cargarLog(){
+  try{
+    const j=await (await fetch('eventos.json?t='+Date.now())).json();
+    const ev=(j.eventos||[]).slice(0,15);
+    document.getElementById('log').innerHTML=ev.length?ev.map(function(e){
+      return '<div class="fila"><span>'+esc(e.texto)+'</span><span>'+String(e.equipo||'').toUpperCase()+' · '+esc(e.hora||'')+'</span></div>'
+    }).join(''):'<div class="cr">Todavía sin eventos.</div>';
+  }catch(e){document.getElementById('log').innerHTML='<div class="cr">Sin registro.</div>'}
+}
+
+/* ---------- confirmación de dos toques para lo que sí duele ---------- */
+let pendiente=null;
+function dosPaso(btn, cmd){
+  if(pendiente===cmd){ pendiente=null; if(btn.dataset.orig) btn.innerHTML=btn.dataset.orig; orden(cmd); return; }
+  pendiente=cmd;
+  if(!btn.dataset.orig) btn.dataset.orig=btn.innerHTML;
+  setTimeout(function(){ pendiente=null; if(btn.dataset.orig) btn.innerHTML=btn.dataset.orig; }, 8000);
+  btn.innerHTML='<b>¿Seguro? Toca otra vez</b><small>se cancela solo en 8 s</small>';
+}
+async function orden(cmd){
+  if(!clave){aviso('Falta la clave de acciones. Pégala aquí abajo una vez.');document.getElementById('cajaClave').style.display='flex';return}
+  aviso('Enviando orden: '+cmd+' …');
+  const botones=[].slice.call(document.querySelectorAll('button'));
+  const tocado=botones.filter(function(b){return (b.getAttribute('onclick')||'').indexOf("'"+cmd+"'")>=0})[0];
+  if(tocado){ tocado.disabled=true; setTimeout(function(){tocado.disabled=false},60000); }
+  try{
+    const r=await fetch('/enjambre/accion.php?k='+encodeURIComponent(clave)+'&cmd='+encodeURIComponent(cmd)+'&t='+Date.now());
+    const j=await r.json();
+    aviso(j.mensaje||'orden recibida');
+    setTimeout(cargar,6000);
+  }catch(e){aviso('No se pudo enviar la orden ('+e+')')}
+}
+
+cargar();cargarUltimaOrden();cargarFotos();cargarPantallas();cargarCamaras();cargarLog();
+setInterval(cargar,30000);setInterval(cargarPantallas,3000);setInterval(cargarCamaras,4000);setInterval(cargarLog,45000);setInterval(cargarUltimaOrden,5000);setInterval(cargarFotos,30000);
+</script>
+</body></html>
